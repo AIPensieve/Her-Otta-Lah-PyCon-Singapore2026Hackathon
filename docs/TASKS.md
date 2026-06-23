@@ -14,14 +14,25 @@
 - [x] Add AGENTS.md project collaboration rules.
 - [x] Run build and fix remaining issues.
 - [x] Push repository to GitHub.
-- [ ] Polish mobile visual design.
-- [ ] Add PWA icons and screenshots.
-- [ ] Add richer Talk to action recommendation states.
-- [ ] Add action completion confirmation before saving.
+- [x] Polish mobile visual design.
+- [x] Add PWA icons and screenshots.
+- [x] Add richer Talk to action recommendation states.
+- [x] Add action completion confirmation before saving.
 
 ## Nice To Have
 
-- Add i18n dictionary structure.
-- Add simple privacy/permission screen.
-- Add smoke tests.
-- Add deploy notes for Vercel or Netlify.
+- [x] Add i18n dictionary structure.
+- [x] Add simple privacy/permission screen.
+- [x] Add smoke tests.
+- [x] Add deploy notes for Vercel or Netlify.
+- [x] Add record repository abstraction.
+- [x] Complete public release checklist verification.
+
+## Future / Post-Demo
+
+- [ ] Wire i18n dictionary into page components (currently pages use hardcoded strings).
+- [ ] Add locale switcher to Me page.
+- [ ] Improve Timeline with date grouping.
+- [ ] Add otter device simulator visual feedback on Talk submit.
+- [ ] Integrate real AI service behind AiAgentService contract.
+- [ ] Replace localRecordRepository with authenticated database backend.

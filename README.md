@@ -13,6 +13,21 @@ npm run dev
 
 Then open the local Vite URL shown in the terminal.
 
+## Build And Deploy
+
+```bash
+npm run build
+```
+
+The production output is generated at `apps/web/dist`.
+
+Deployment config is included for:
+
+- Vercel: `vercel.json`
+- Netlify: `netlify.toml`
+
+Both configs use `npm run build` and publish `apps/web/dist`. The app is a client-side Web/PWA demo, so all routes fall back to `index.html`.
+
 ## Demo Flow
 
 1. The user starts on **Talk** and enters one sentence, simulating voice input.
@@ -29,6 +44,7 @@ Then open the local Vite URL shown in the terminal.
 - Mock AI service with future-compatible method names.
 - Device simulator and shared device protocol types.
 - Local storage persistence for demo records.
+- PWA manifest, install icons, and screenshot previews.
 - No real AI, RAG, accounts, database, voice, TTS, GPS, Bluetooth, Wi-Fi, or hardware integration.
 
 ## Future Replacement Points

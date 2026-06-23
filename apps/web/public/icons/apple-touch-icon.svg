@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-labelledby="title desc">
+  <title id="title">nearu touch icon</title>
+  <desc id="desc">A compact calm otter icon for iOS home screen preview.</desc>
+  <rect width="180" height="180" rx="40" fill="#0f766e"/>
+  <circle cx="90" cy="88" r="52" fill="#fef3c7"/>
+  <circle cx="68" cy="60" r="18" fill="#fef3c7"/>
+  <circle cx="112" cy="60" r="18" fill="#fef3c7"/>
+  <circle cx="74" cy="84" r="6" fill="#134e4a"/>
+  <circle cx="106" cy="84" r="6" fill="#134e4a"/>
+  <path d="M82 102c5 5 11 5 16 0" fill="none" stroke="#134e4a" stroke-width="6" stroke-linecap="round"/>
+</svg>

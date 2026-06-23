@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">nearu maskable app icon</title>
+  <desc id="desc">A maskable calm otter companion icon for install surfaces.</desc>
+  <rect width="512" height="512" fill="#0f766e"/>
+  <circle cx="256" cy="250" r="142" fill="#fef3c7"/>
+  <circle cx="192" cy="172" r="48" fill="#fef3c7"/>
+  <circle cx="320" cy="172" r="48" fill="#fef3c7"/>
+  <circle cx="208" cy="244" r="16" fill="#134e4a"/>
+  <circle cx="304" cy="244" r="16" fill="#134e4a"/>
+  <path d="M236 284c10 12 30 12 40 0" fill="none" stroke="#134e4a" stroke-width="16" stroke-linecap="round"/>
+  <path d="M176 336c44 34 116 34 160 0" fill="none" stroke="#0f766e" stroke-width="20" stroke-linecap="round"/>
+</svg>

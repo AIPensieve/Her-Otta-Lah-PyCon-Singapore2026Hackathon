@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import type { ExercisePlan, SuggestedAction } from "@ai-otter/shared-types";
+import type { ActionCompletionResponse, ExercisePlan, SuggestedAction } from "@ai-otter/shared-types";
 import { aiAgentService } from "@ai-otter/mock-ai";
 import { Button, PageShell, Panel } from "@ai-otter/ui";
-import { saveRecord } from "../store/localRecords";
+import { SaveRecordPrompt } from "../components/SaveRecordPrompt";
+import { recordRepository } from "../store/localRecords";
+import { LoadingSpinner } from "../components/LoadingStates";
 
 const fallbackAction: SuggestedAction = {
   id: "action_move_default",
@@ -19,34 +21,64 @@ export function MovePage({ activeAction }: { activeAction: SuggestedAction | nul
   const action = activeAction?.type === "move" ? activeAction : fallbackAction;
   const [plan, setPlan] = useState<ExercisePlan | null>(null);
   const [step, setStep] = useState(0);
+  const [completion, setCompletion] = useState<ActionCompletionResponse | null>(null);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
+    setPlan(null);
     aiAgentService.createExercisePlan(action).then(setPlan);
+    setCompletion(null);
+    setSaved(false);
   }, [action]);
 
   const complete = async () => {
-    const completion = await aiAgentService.completeAction(action);
-    saveRecord(completion.proposedRecord);
+    setCompletion(await aiAgentService.completeAction(action));
+    setSaved(false);
+  };
+
+  const confirmSave = async () => {
+    if (!completion || saved) return;
+    await recordRepository.create(completion.proposedRecord);
     setSaved(true);
   };
 
   return (
     <PageShell title="动一动">
-      <Panel>
-        <h2 className="text-2xl font-bold">{plan?.title ?? action.title}</h2>
-        <p className="mt-2 text-slate-600">强度：轻柔。任何明显不舒服都可以立刻停下。</p>
-        <div className="my-5 rounded-lg bg-amber-50 p-4 text-lg font-semibold text-amber-950">
-          {plan?.steps[step]?.instruction ?? action.reason}
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <Button tone="secondary" onClick={() => setStep((value) => Math.max(0, value - 1))}>上一步</Button>
-          <Button onClick={() => setStep((value) => Math.min((plan?.steps.length ?? 1) - 1, value + 1))}>下一步</Button>
-        </div>
-        <Button className="mt-3 w-full" onClick={complete}>完成并记录</Button>
-        {saved && <p className="mt-3 font-semibold text-teal-800">已保存到记录。</p>}
-        <p className="mt-4 text-sm text-slate-500">{plan?.safetyDisclaimer}</p>
-      </Panel>
+      {!plan ? (
+        <LoadingSpinner message="正在为您生成专属的小动作..." />
+      ) : (
+        <Panel className="p-5">
+          <h2 className="text-2xl font-bold text-slate-900">{plan.title}</h2>
+          <div className="mt-3 flex items-start gap-2 rounded-lg bg-teal-50 px-3 py-2">
+            <div className="mt-0.5 text-teal-600">i</div>
+            <p className="text-sm font-medium text-teal-900">强度：轻柔。任何明显不舒服都可以立刻停下。</p>
+          </div>
+          
+          <div className="my-6 min-h-32 rounded-xl bg-stone-50 border border-stone-100 p-5 shadow-inner">
+            <p className="text-sm font-bold tracking-widest text-slate-400 uppercase mb-2">Step {step + 1}</p>
+            <p className="text-xl font-semibold text-slate-800 leading-relaxed">
+              {plan.steps[step]?.instruction ?? action.reason}
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <Button tone="secondary" onClick={() => setStep((value) => Math.max(0, value - 1))}>上一步</Button>
+            <Button onClick={() => setStep((value) => Math.min((plan.steps.length) - 1, value + 1))}>下一步</Button>
+          </div>
+          
+          <Button className="mt-4 w-full bg-slate-900 text-white active:bg-slate-800" onClick={complete}>完成并记录</Button>
+          <p className="mt-6 text-xs italic text-slate-400">{plan.safetyDisclaimer}</p>
+        </Panel>
+      )}
+      
+      {completion && (
+        <SaveRecordPrompt
+          completion={completion}
+          saved={saved}
+          onDismiss={() => setCompletion(null)}
+          onSave={confirmSave}
+        />
+      )}
     </PageShell>
   );
 }

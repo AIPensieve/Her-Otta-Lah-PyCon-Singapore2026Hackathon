@@ -10,7 +10,7 @@ This repository is a small npm workspace:
 - `packages/ui`: reusable React UI primitives.
 - `docs`: product, architecture, API, device, release, and roadmap notes.
 
-The Web app keeps page components thin. AI decisions live behind `AiAgentService`, device behavior lives behind `DeviceSimulator`, and records are stored through a local repository wrapper.
+The Web app keeps page components thin. AI decisions live behind `AiAgentService`, device behavior lives behind `DeviceSimulator`, and records are stored through a `RecordRepository` boundary with a local storage implementation for the demo.
 
 ## Data Flow
 
@@ -26,7 +26,7 @@ The Web app keeps page components thin. AI decisions live behind `AiAgentService
 
 - AI: replace mock service with a real Agent API while keeping the same app-facing contract.
 - RAG: add retrieval before response generation without changing page components.
-- Storage: replace local storage with a repository backed by a database and user account.
+- Storage: replace `localRecordRepository` with a repository backed by a database and user account.
 - Voice/TTS: add browser and native adapters behind feature-specific service boundaries.
 - Hardware: replace `DeviceSimulator` with Bluetooth/Wi-Fi adapters using `DeviceCommand`.
 - Privacy: add permission records, user consent screens, data retention rules, and export/delete flows.
