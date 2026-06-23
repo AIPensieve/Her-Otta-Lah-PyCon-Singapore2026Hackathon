@@ -11,12 +11,13 @@
 - [x] Add README.
 - [x] Add architecture documentation.
 - [x] Add commercial roadmap.
+- [x] Add AGENTS.md project collaboration rules.
+- [x] Run build and fix remaining issues.
+- [x] Push repository to GitHub.
 - [ ] Polish mobile visual design.
 - [ ] Add PWA icons and screenshots.
 - [ ] Add richer Talk to action recommendation states.
 - [ ] Add action completion confirmation before saving.
-- [ ] Run build and fix remaining issues.
-- [ ] Push repository to GitHub.
 
 ## Nice To Have
 
