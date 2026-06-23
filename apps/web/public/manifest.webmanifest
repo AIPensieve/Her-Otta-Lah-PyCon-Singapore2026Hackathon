@@ -1,0 +1,9 @@
+{
+  "name": "nearu AI Otter Coach",
+  "short_name": "nearu",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafaf9",
+  "theme_color": "#0f766e",
+  "description": "A gentle AI otter companion demo for talk, breathe, move, and records."
+}

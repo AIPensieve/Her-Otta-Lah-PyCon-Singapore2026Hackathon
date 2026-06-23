@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@ai-otter/shared-types": ["../../packages/shared-types/src"],
+      "@ai-otter/mock-ai": ["../../services/mock-ai/src"],
+      "@ai-otter/ui": ["../../packages/ui/src"]
+    }
+  },
+  "include": ["src", "../../packages/shared-types/src", "../../services/mock-ai/src", "../../packages/ui/src"],
+  "references": []
+}

@@ -1,0 +1,21 @@
+{
+  "name": "ai-otter-coach",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Hackathon Web/PWA demo for an AI otter health companion.",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace apps/web run dev",
+    "build": "npm --workspace apps/web run build",
+    "typecheck": "npm --workspace apps/web run typecheck"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.8.3"
+  }
+}
