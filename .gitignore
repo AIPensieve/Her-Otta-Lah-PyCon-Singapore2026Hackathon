@@ -39,6 +39,8 @@ work/
 outputs/
 screenshots/
 .claude/
+AGENTS.md
+update_css.js
 *.log
 
 # ── Database ──────────────────────────────────────────────────────────────────
