@@ -1,0 +1,13 @@
+# Copy this file to config.py and fill in your values.
+# config.py is gitignored — never commit real credentials.
+
+WIFI_SSID     = "Your_WiFi_SSID"
+WIFI_PASSWORD = "your_wifi_password"
+
+# IP address of the machine running the Python backend
+# (find it with: ifconfig | grep inet  on macOS/Linux)
+WS_HOST = "192.168.1.100"
+WS_PORT = 8000
+WS_PATH = "/ws/device"
+
+DEVICE_ID = "otter-001"

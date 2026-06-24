@@ -7,6 +7,7 @@ import { MovePage } from "../pages/MovePage";
 import { TalkPage } from "../pages/TalkPage";
 import { TimelinePage } from "../pages/TimelinePage";
 import { WatchfacePage } from "../pages/WatchfacePage";
+import { DeviceHardwareUI } from "../components/DeviceHardwareUI";
 import { deviceAdapter } from "../services/deviceAdapter";
 import { getRouteFromHash, type AppRoute } from "./routes";
 import { LangProvider } from "../locales";
@@ -14,6 +15,7 @@ import { LangProvider } from "../locales";
 export function App() {
   const [route, setRoute] = useState<AppRoute>(() => getRouteFromHash(window.location.hash));
   const [activeAction, setActiveAction] = useState<SuggestedAction | null>(null);
+  const [showDevice, setShowDevice] = useState(false);
 
   useEffect(() => {
     const onHashChange = () => setRoute(getRouteFromHash(window.location.hash));
@@ -49,13 +51,43 @@ export function App() {
 
   return (
     <LangProvider>
-      {route === "talk" && <TalkPage onStartAction={startAction} />}
-      {route === "breathe" && <BreathePage activeAction={activeAction} />}
-      {route === "move" && <MovePage activeAction={activeAction} />}
-      {route === "timeline" && <TimelinePage />}
-      {route === "me" && <MePage />}
+      {route === "talk"       && <TalkPage onStartAction={startAction} />}
+      {route === "breathe"    && <BreathePage activeAction={activeAction} />}
+      {route === "move"       && <MovePage activeAction={activeAction} />}
+      {route === "timeline"   && <TimelinePage />}
+      {route === "me"         && <MePage />}
       {route === "watchfaces" && <WatchfacePage />}
+
       {route !== "watchfaces" && <BottomNav activeRoute={route} />}
+
+      {/* Floating device simulator button — visible on all pages */}
+      {route !== "watchfaces" && (
+        <button
+          onClick={() => setShowDevice(true)}
+          title="打开表盘模拟器"
+          style={{
+            position: "fixed",
+            bottom: "88px",
+            right: "16px",
+            zIndex: 90,
+            width: "48px",
+            height: "48px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg,#2d5a3d,#446f4d)",
+            border: "2px solid rgba(255,255,255,0.25)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            fontSize: "22px",
+          }}
+        >
+          ⌚
+        </button>
+      )}
+
+      {showDevice && <DeviceHardwareUI onClose={() => setShowDevice(false)} />}
     </LangProvider>
   );
 }

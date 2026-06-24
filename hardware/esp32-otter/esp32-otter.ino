@@ -1,371 +1,307 @@
 /*
- * AI Otter Coach – ESP32-S3-Touch-AMOLED-1.75 Firmware
- * ======================================================
- * Board: Waveshare ESP32-S3-Touch-AMOLED-1.75
- * Display: 1.75" AMOLED (368x448, RM67162 driver via QSPI)
+ * AI Otter Coach — ESP32-S3-Touch-AMOLED-1.75
+ * Display: RM67162  368×448  QSPI AMOLED
  *
- * Required Arduino libraries (install via Library Manager):
- *   - WebSockets by Markus Sattler       (search: "WebSockets")
- *   - ArduinoJson by Benoit Blanchon     (search: "ArduinoJson")
- *   - Waveshare ESP32-S3 AMOLED          (download from Waveshare wiki or GitHub)
- *     Wiki: https://www.waveshare.net/wiki/ESP32-S3-Touch-AMOLED-1.75
+ * Required libraries (Tools → Manage Libraries):
+ *   • LovyanGFX    by lovyan03   (search "LovyanGFX")
+ *   • WebSockets   by Markus Sattler
+ *   • ArduinoJson  by Benoit Blanchon (>= 7)
  *
- * Board settings (Arduino IDE):
- *   Board: ESP32S3 Dev Module
- *   Flash: 16MB (128Mb)
- *   PSRAM: OPI PSRAM
- *   USB CDC On Boot: Enabled (for Serial monitor)
- *
- * Connection:
- *   ESP32 → WiFi → Python Backend WS /ws/device
- *   Receives: DeviceCommand JSON
- *   Sends:    DeviceState JSON updates
+ * Board: ESP32S3 Dev Module
+ *   Flash Size:       16MB (128Mb)
+ *   PSRAM:            OPI PSRAM
+ *   USB CDC On Boot:  Enabled
+ *   Upload Speed:     921600
  */
 
+#define LGFX_USE_V1
+#include <LovyanGFX.hpp>
+#include "config.h"
 #include <WiFi.h>
 #include <WebSocketsClient.h>
 #include <ArduinoJson.h>
 
-// Waveshare AMOLED library for ESP32-S3-Touch-AMOLED-1.75
-// Adjust the include path to match the library you downloaded from Waveshare.
-#include <LilyGo_AMOLED.h>   // or: #include "AMOLED_SH8601.h"
-
-#include "config.h"
-
-// ---------------------------------------------------------------------------
-// Display & touch
-// ---------------------------------------------------------------------------
-LilyGo_Class amoled;           // Waveshare wrapper (adjust class name if needed)
-
-// Display dimensions for this board
-static const int DISP_W = 368;
-static const int DISP_H = 448;
-
-// ---------------------------------------------------------------------------
-// WebSocket client
-// ---------------------------------------------------------------------------
-WebSocketsClient ws;
-bool ws_connected = false;
-
-// ---------------------------------------------------------------------------
-// Device state (sent to backend on change)
-// ---------------------------------------------------------------------------
-struct OtterState {
-  String screenState = "idle";
-  String lightMode   = "soft";
-  int    batteryLevel = 85;
-};
-OtterState state;
-
-// ---------------------------------------------------------------------------
-// Forward declarations
-// ---------------------------------------------------------------------------
-void handle_command(const String& json);
-void draw_idle();
-void draw_listening();
-void draw_breathing(int step, int total, const String& text);
-void draw_moving(int step, int total, const String& text);
-void draw_complete(const String& msg);
-void draw_text_centered(const String& line1, const String& line2 = "", uint32_t color = 0xFFFFFF);
-void send_state();
-
-// ---------------------------------------------------------------------------
-// Setup
-// ---------------------------------------------------------------------------
-void setup() {
-  Serial.begin(115200);
-  delay(500);
-  Serial.println("[Otter] Booting…");
-
-  // Init AMOLED display
-  // NOTE: The exact API depends on your Waveshare library version.
-  // Check the library examples for the correct begin() call.
-  amoled.begin();
-  amoled.setBrightness(200);
-  amoled.fillScreen(0x000000);
-  draw_text_centered("AI Otter Coach", "启动中…", 0x44CCAA);
-
-  // Connect WiFi
-  Serial.printf("[WiFi] Connecting to %s …\n", WIFI_SSID);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  int retries = 0;
-  while (WiFi.status() != WL_CONNECTED && retries < 30) {
-    delay(500);
-    Serial.print(".");
-    retries++;
-  }
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("\n[WiFi] FAILED – running offline");
-    draw_text_centered("WiFi 未连接", "请检查 config.h", 0xFF4444);
-    return;
-  }
-  Serial.printf("\n[WiFi] Connected: %s\n", WiFi.localIP().toString().c_str());
-
-  // Connect WebSocket to Python backend
-  ws.begin(WS_HOST, WS_PORT, WS_PATH);
-  ws.onEvent(ws_event);
-  ws.setReconnectInterval(3000);
-  ws.enableHeartbeat(15000, 3000, 2);
-
-  draw_text_centered("连接后台中…", WS_HOST, 0xAAAAFF);
-}
-
-// ---------------------------------------------------------------------------
-// Loop
-// ---------------------------------------------------------------------------
-void loop() {
-  ws.loop();
-}
-
-// ---------------------------------------------------------------------------
-// WebSocket event handler
-// ---------------------------------------------------------------------------
-void ws_event(WStype_t type, uint8_t* payload, size_t length) {
-  switch (type) {
-    case WStype_CONNECTED:
-      ws_connected = true;
-      Serial.printf("[WS] Connected to ws://%s:%d%s\n", WS_HOST, WS_PORT, WS_PATH);
-      state.screenState = "idle";
-      send_state();
-      draw_idle();
-      break;
-
-    case WStype_DISCONNECTED:
-      ws_connected = false;
-      Serial.println("[WS] Disconnected – will retry");
-      draw_text_centered("断开连接", "重连中…", 0xFF8844);
-      break;
-
-    case WStype_TEXT:
-      handle_command(String((char*)payload));
-      break;
-
-    default:
-      break;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Command handler
-// ---------------------------------------------------------------------------
-void handle_command(const String& json) {
-  Serial.printf("[CMD] %s\n", json.c_str());
-
-  JsonDocument doc;
-  if (deserializeJson(doc, json) != DeserializationError::Ok) {
-    Serial.println("[CMD] JSON parse error");
-    return;
-  }
-
-  const char* type = doc["type"];
-  if (!type) return;
-
-  // ── SET_SCREEN_STATE ────────────────────────────────────────────────────
-  if (strcmp(type, "SET_SCREEN_STATE") == 0) {
-    state.screenState = doc["payload"]["screenState"].as<String>();
-    if (state.screenState == "idle")      draw_idle();
-    else if (state.screenState == "listening") draw_listening();
-    send_state();
-  }
-
-  // ── SET_LIGHT_MODE ──────────────────────────────────────────────────────
-  else if (strcmp(type, "SET_LIGHT_MODE") == 0) {
-    state.lightMode = doc["payload"]["lightMode"].as<String>();
-    // No physical LED on this board, but store the state
-    send_state();
-  }
-
-  // ── PLAY_SHORT_REPLY ────────────────────────────────────────────────────
-  else if (strcmp(type, "PLAY_SHORT_REPLY") == 0) {
-    String text = doc["payload"]["text"].as<String>();
-    draw_listening();
-    state.screenState = "listening";
-    send_state();
-    // Return to idle after 2 seconds (non-blocking via millis)
-    // Simple approach: block 2s here (acceptable for demo)
-    delay(2000);
-    draw_idle();
-    state.screenState = "idle";
-    send_state();
-  }
-
-  // ── SHOW_STEP ───────────────────────────────────────────────────────────
-  else if (strcmp(type, "SHOW_STEP") == 0) {
-    String text      = doc["payload"]["text"].as<String>();
-    int    stepNum   = doc["payload"]["stepNum"].as<int>();
-    int    total     = doc["payload"]["totalSteps"].as<int>();
-    String mode      = doc["payload"]["mode"].as<String>();
-
-    if (mode == "breathe") {
-      state.screenState = "breathing";
-      draw_breathing(stepNum, total, text);
-    } else {
-      state.screenState = "moving";
-      draw_moving(stepNum, total, text);
+// ── LovyanGFX: Waveshare ESP32-S3-Touch-AMOLED-1.75 (RM67162 QSPI) ──────────
+class LGFX : public lgfx::LGFX_Device {
+  lgfx::Panel_RM67162 _panel;
+  lgfx::Bus_QSPI      _bus;
+public:
+  LGFX() {
+    {
+      auto cfg = _bus.config();
+      cfg.spi_host   = SPI2_HOST;
+      cfg.freq_write = 80000000;
+      cfg.pin_sclk   = 38;
+      cfg.pin_d0     = 4;
+      cfg.pin_d1     = 5;
+      cfg.pin_d2     = 6;
+      cfg.pin_d3     = 7;
+      cfg.pin_cs     = 12;
+      _bus.config(cfg);
+      _panel.setBus(&_bus);
     }
-    send_state();
+    {
+      auto cfg = _panel.config();
+      cfg.pin_cs       = -1;   // managed by bus
+      cfg.pin_rst      = 39;
+      cfg.pin_busy     = -1;
+      cfg.memory_width  = 368;
+      cfg.memory_height = 448;
+      cfg.panel_width   = 368;
+      cfg.panel_height  = 448;
+      cfg.offset_x      = 0;
+      cfg.offset_y      = 0;
+      cfg.offset_rotation = 0;
+      cfg.invert        = true;  // AMOLED typically needs invert
+      cfg.rgb_order     = false;
+      cfg.readable      = false;
+      cfg.bus_shared    = false;
+      _panel.config(cfg);
+    }
+    setPanel(&_panel);
   }
+};
 
-  // ── SHOW_COMPLETE ────────────────────────────────────────────────────────
-  else if (strcmp(type, "SHOW_COMPLETE") == 0) {
-    String msg = doc["payload"]["message"].as<String>();
-    draw_complete(msg);
-    state.screenState = "idle";
-    send_state();
-  }
+static LGFX display;
 
-  // ── VIBRATE ──────────────────────────────────────────────────────────────
-  else if (strcmp(type, "VIBRATE") == 0) {
-    // This board does not have a built-in vibration motor.
-    // If you add one on a GPIO, drive it here.
-    Serial.println("[VIB] Vibrate (no motor on this board)");
-  }
+#define SCREEN_W 368
+#define SCREEN_H 448
+
+// ── Colours (RGB565) ──────────────────────────────────────────────────────────
+#define C_BLACK      0x0000
+#define C_WHITE      0xFFFF
+#define C_WARM_BEIGE 0xF7D4
+#define C_DARK_GREEN 0x0323
+#define C_MID_GREEN  0x0564
+#define C_TEAL       0x0666
+#define C_DARK_BLUE  0x0228
+#define C_DARK_GRAY  0x2104
+#define C_YELLOW     0xFFE0
+
+// ── Device state ─────────────────────────────────────────────────────────────
+struct DeviceState {
+  String screenState  = "idle";
+  String screenText   = "";
+  int    countdown    = 0;
+  int    batteryLevel = 86;
+  String lightMode    = "soft";
+};
+DeviceState devState;
+
+// ── WebSocket ─────────────────────────────────────────────────────────────────
+WebSocketsClient ws;
+bool wsConnected = false;
+
+void renderState();
+void sendDeviceState();
+
+// ── Visual config per state ───────────────────────────────────────────────────
+struct Visual { uint16_t bg, fg; const char* label; };
+
+Visual getVisual(const String& s) {
+  if (s == "listening")          return {C_DARK_GREEN,  C_WHITE,      "LISTENING"};
+  if (s == "thinking")           return {C_MID_GREEN,   C_WHITE,      "THINKING"};
+  if (s == "breathing")          return {C_TEAL,        C_WHITE,      "BREATHE"};
+  if (s == "night_calm")         return {C_DARK_BLUE,   0x8AD0,       "NIGHT"};
+  if (s == "hot_flash_calm")     return {0x5280,        0xFBE0,       "COOL DOWN"};
+  if (s == "exercise_countdown") return {0x0924,        0xD7F0,       "MOVE"};
+  if (s == "next_move")          return {0x09A3,        C_YELLOW,     "NEXT"};
+  if (s == "moving")             return {0x0924,        0xD7F0,       "MOVING"};
+  if (s == "sleeping")           return {C_DARK_GRAY,   0x6070,       "ZZZ"};
+  if (s == "reminder")           return {0x5920,        0xFCC0,       "REMINDER"};
+  if (s == "low_battery")        return {0x5800,        0xF800,       "LOW BATT"};
+  if (s == "location_confirm")   return {C_MID_GREEN,   C_WHITE,      "LOCATION?"};
+  if (s == "location_sent")      return {C_DARK_GREEN,  C_WHITE,      "SENT"};
+  return {C_WARM_BEIGE, 0x6320, "IDLE"};
 }
 
-// ---------------------------------------------------------------------------
-// Send current state to backend
-// ---------------------------------------------------------------------------
-void send_state() {
-  if (!ws_connected) return;
+// ── Rendering ─────────────────────────────────────────────────────────────────
+void centreText(const char* txt, int y, uint16_t col, uint8_t sz) {
+  display.setTextSize(sz);
+  display.setTextColor(col);
+  int w = strlen(txt) * 6 * sz;
+  display.setCursor(max(0, (SCREEN_W - w) / 2), y);
+  display.print(txt);
+}
 
+void renderState() {
+  auto v = getVisual(devState.screenState);
+  display.fillScreen(v.bg);
+
+  // Big state label
+  centreText(v.label, SCREEN_H / 2 - 40, v.fg, 4);
+
+  // Sub-text
+  if (devState.screenText.length() > 0) {
+    String t = devState.screenText;
+    int y = SCREEN_H / 2 + 20;
+    while (t.length() > 0 && y < SCREEN_H - 30) {
+      String line = t.substring(0, min((int)t.length(), 20));
+      centreText(line.c_str(), y, v.fg, 2);
+      t = t.substring(line.length());
+      y += 24;
+    }
+  }
+
+  // Countdown
+  if (devState.countdown > 0) {
+    String cs = String(devState.countdown) + "s";
+    centreText(cs.c_str(), SCREEN_H / 2 + 90, v.fg, 5);
+  }
+
+  // Decorative ring for active states
+  if (devState.screenState != "idle" && devState.screenState != "sleeping") {
+    display.drawCircle(SCREEN_W/2, SCREEN_H/2, 170, v.fg & 0x3186);
+  }
+
+  // Breathing rings
+  if (devState.screenState == "breathing") {
+    display.drawCircle(SCREEN_W/2, SCREEN_H/2, 140, 0xFFFF);
+    display.drawCircle(SCREEN_W/2, SCREEN_H/2, 100, 0xFFFF);
+  }
+
+  // Idle: battery + time placeholder
+  if (devState.screenState == "idle") {
+    String bat = String(devState.batteryLevel) + "%";
+    display.setTextSize(1); display.setTextColor(v.fg);
+    display.setCursor(SCREEN_W - 30, 10);
+    display.print(bat);
+    display.setTextSize(3); display.setTextColor(v.fg);
+    display.setCursor(SCREEN_W/2 - 30, 60);
+    display.print("--:--");
+  }
+
+  Serial.printf("[Screen] %s | %s | %ds\n",
+    devState.screenState.c_str(), devState.screenText.c_str(), devState.countdown);
+}
+
+// ── WebSocket ─────────────────────────────────────────────────────────────────
+void sendDeviceState() {
   JsonDocument doc;
   doc["deviceId"]     = DEVICE_ID;
-  doc["connection"]   = "connected";
-  doc["batteryLevel"] = state.batteryLevel;
-  doc["screenState"]  = state.screenState;
-  doc["lightMode"]    = state.lightMode;
-  doc["volume"]       = 50;
-
-  String out;
-  serializeJson(doc, out);
+  doc["connection"]   = wsConnected ? "connected" : "disconnected";
+  doc["batteryLevel"] = devState.batteryLevel;
+  doc["screenState"]  = devState.screenState;
+  doc["lightMode"]    = devState.lightMode;
+  String out; serializeJson(doc, out);
   ws.sendTXT(out);
 }
 
-// ---------------------------------------------------------------------------
-// Display helpers
-// ---------------------------------------------------------------------------
+void handleCommand(const String& raw) {
+  JsonDocument doc;
+  if (deserializeJson(doc, raw)) { Serial.println("[CMD] bad json"); return; }
 
-// Background colors
-static const uint32_t BG_IDLE      = 0x0D1B2A;  // dark navy
-static const uint32_t BG_LISTEN    = 0x0F3D3D;  // teal dark
-static const uint32_t BG_BREATHE   = 0x0A2A1A;  // dark green
-static const uint32_t BG_MOVE      = 0x1A1A0A;  // dark warm
-static const uint32_t BG_COMPLETE  = 0x0A1A0A;  // dark green
+  String type = doc["type"].as<String>();
+  Serial.printf("[CMD] %s\n", type.c_str());
 
-void draw_idle() {
-  amoled.fillScreen(BG_IDLE);
-  // Otter emoji as simple circle placeholder
-  amoled.fillCircle(DISP_W / 2, DISP_H / 2 - 40, 60, 0x226655);
-  // Text
-  amoled.setTextColor(0x44DDBB);
-  amoled.setTextSize(2);
-  amoled.drawCentreString("🦦", DISP_W / 2, DISP_H / 2 - 55, 1);
-  amoled.setTextColor(0xFFFFFF);
-  amoled.setTextSize(2);
-  amoled.drawCentreString("AI Otter", DISP_W / 2, DISP_H / 2 + 40, 1);
-  amoled.setTextSize(1);
-  amoled.setTextColor(0x888888);
-  amoled.drawCentreString("待机中", DISP_W / 2, DISP_H / 2 + 70, 1);
+  if (type == "DEVICE_STATE") {
+    devState.screenState = doc["payload"]["state"] | "idle";
+    devState.screenText  = doc["payload"]["screen_text"] | "";
+    devState.countdown   = doc["payload"]["duration_seconds"] | 0;
+    String v = doc["payload"]["voice_text"] | "";
+    if (v.length()) Serial.printf("[Voice] %s\n", v.c_str());
+  } else if (type == "SET_SCREEN_STATE") {
+    devState.screenState = doc["payload"]["screenState"] | "idle";
+    devState.screenText  = ""; devState.countdown = 0;
+  } else if (type == "SHOW_STEP") {
+    devState.screenText  = doc["payload"]["text"] | "";
+    devState.countdown   = doc["payload"]["durationSeconds"] | 30;
+    String mode = doc["payload"]["mode"] | "breathe";
+    devState.screenState = (mode == "move") ? "exercise_countdown" : "breathing";
+  } else if (type == "SHOW_COMPLETE") {
+    devState.screenState = "idle";
+    devState.screenText  = doc["payload"]["message"] | "完成！";
+    devState.countdown   = 0;
+  } else if (type == "PLAY_SHORT_REPLY") {
+    devState.screenText  = doc["payload"]["text"] | "";
+    devState.screenState = "listening";
+  } else if (type == "SET_LIGHT_MODE") {
+    devState.lightMode   = doc["payload"]["lightMode"] | "soft";
+    return;
+  } else {
+    Serial.printf("[CMD] Unknown: %s\n", type.c_str());
+    return;
+  }
+  renderState();
+  sendDeviceState();
 }
 
-void draw_listening() {
-  amoled.fillScreen(BG_LISTEN);
-  amoled.setTextColor(0x44FFCC);
-  amoled.setTextSize(2);
-  amoled.drawCentreString("我在听", DISP_W / 2, DISP_H / 2 - 20, 1);
-  amoled.setTextSize(1);
-  amoled.setTextColor(0xAAFFEE);
-  amoled.drawCentreString("说吧，我陪着你", DISP_W / 2, DISP_H / 2 + 20, 1);
-}
-
-void draw_breathing(int step, int total, const String& text) {
-  amoled.fillScreen(BG_BREATHE);
-
-  // Concentric circles for breathing animation
-  int cx = DISP_W / 2;
-  int cy = 140;
-  amoled.drawCircle(cx, cy, 80, 0x226644);
-  amoled.drawCircle(cx, cy, 60, 0x338855);
-  amoled.fillCircle(cx, cy, 40, 0x44AAAA);
-  amoled.setTextColor(0xFFFFFF);
-  amoled.setTextSize(1);
-  amoled.drawCentreString("呼吸", cx, cy - 8, 1);
-
-  // Step indicator
-  amoled.setTextColor(0x88FFCC);
-  amoled.setTextSize(1);
-  String stepLabel = String(step) + " / " + String(total);
-  amoled.drawCentreString(stepLabel.c_str(), DISP_W / 2, 240, 1);
-
-  // Instruction text (wrapped manually for small display)
-  amoled.setTextColor(0xFFFFFF);
-  amoled.setTextSize(2);
-  draw_wrapped(text, 20, 270, DISP_W - 40, 0xFFFFFF);
-}
-
-void draw_moving(int step, int total, const String& text) {
-  amoled.fillScreen(BG_MOVE);
-
-  amoled.setTextColor(0xFFDD88);
-  amoled.setTextSize(1);
-  amoled.drawCentreString("动一动", DISP_W / 2, 60, 1);
-
-  String stepLabel = "Step " + String(step) + " / " + String(total);
-  amoled.setTextColor(0xAAAAAA);
-  amoled.setTextSize(1);
-  amoled.drawCentreString(stepLabel.c_str(), DISP_W / 2, 100, 1);
-
-  amoled.setTextColor(0xFFFFFF);
-  amoled.setTextSize(2);
-  draw_wrapped(text, 20, 160, DISP_W - 40, 0xFFFFFF);
-}
-
-void draw_complete(const String& msg) {
-  amoled.fillScreen(BG_COMPLETE);
-  amoled.setTextColor(0x44FF88);
-  amoled.setTextSize(2);
-  amoled.drawCentreString("完成！", DISP_W / 2, 160, 1);
-  amoled.setTextColor(0xFFFFFF);
-  amoled.setTextSize(1);
-  draw_wrapped(msg, 20, 220, DISP_W - 40, 0xFFFFFF);
-}
-
-void draw_text_centered(const String& line1, const String& line2, uint32_t color) {
-  amoled.fillScreen(0x000000);
-  amoled.setTextColor(color);
-  amoled.setTextSize(2);
-  amoled.drawCentreString(line1.c_str(), DISP_W / 2, DISP_H / 2 - 20, 1);
-  if (line2.length() > 0) {
-    amoled.setTextSize(1);
-    amoled.setTextColor(0xAAAAAA);
-    amoled.drawCentreString(line2.c_str(), DISP_W / 2, DISP_H / 2 + 20, 1);
+void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
+  switch (type) {
+    case WStype_CONNECTED:
+      wsConnected = true;
+      Serial.println("[WS] Connected");
+      sendDeviceState();
+      renderState();
+      break;
+    case WStype_DISCONNECTED:
+      wsConnected = false;
+      Serial.println("[WS] Disconnected – retrying");
+      break;
+    case WStype_TEXT:
+      handleCommand(String((char*)payload));
+      break;
+    default: break;
   }
 }
 
-// Simple text wrapper: breaks at spaces when line exceeds maxW pixels
-// NOTE: For Chinese characters, each char is ~16px wide at textSize 2.
-void draw_wrapped(const String& text, int x, int y, int maxW, uint32_t color) {
-  amoled.setTextColor(color);
-  amoled.setTextSize(2);
+// ── Setup ─────────────────────────────────────────────────────────────────────
+void setup() {
+  Serial.begin(115200);
+  delay(500);
+  Serial.println("=== AI Otter Coach ===");
 
-  // Rough char width for size-2 ASCII: 12px; Chinese: ~16px
-  // For a proper implementation use TFT_eSPI textWidth() or similar.
-  const int lineH = 28;
-  int charW = 12;
-  int charsPerLine = maxW / charW;
-
-  String line = "";
-  int lineY = y;
-  for (int i = 0; i < (int)text.length(); i++) {
-    char c = text[i];
-    line += c;
-    if ((int)line.length() >= charsPerLine) {
-      amoled.drawString(line.c_str(), x, lineY, 1);
-      lineY += lineH;
-      line = "";
-    }
+  // Display
+  Serial.println("[Display] init...");
+  if (display.init()) {
+    display.setRotation(0);
+    display.setBrightness(200);
+    display.fillScreen(C_BLACK);
+    centreText("AI Otter", SCREEN_H/2 - 20, C_WHITE, 3);
+    centreText("Starting...",  SCREEN_H/2 + 20, 0xAD55, 2);
+    Serial.println("[Display] OK");
+  } else {
+    Serial.println("[Display] FAILED — check pins/library");
   }
-  if (line.length() > 0) {
-    amoled.drawString(line.c_str(), x, lineY, 1);
+
+  // WiFi
+  display.fillScreen(C_BLACK);
+  centreText("WiFi...", SCREEN_H/2, C_WHITE, 2);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  for (int i = 0; i < 40 && WiFi.status() != WL_CONNECTED; i++) {
+    delay(500); Serial.print(".");
+  }
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.printf("\n[WiFi] %s\n", WiFi.localIP().toString().c_str());
+    display.fillScreen(C_DARK_GREEN);
+    centreText("WiFi OK", SCREEN_H/2 - 20, C_WHITE, 3);
+    centreText(WiFi.localIP().toString().c_str(), SCREEN_H/2 + 20, C_WHITE, 1);
+    delay(800);
+  } else {
+    Serial.println("\n[WiFi] FAILED");
+    display.fillScreen(0x5800);
+    centreText("WiFi FAIL", SCREEN_H/2, C_WHITE, 2);
+    delay(1500);
+  }
+
+  // WebSocket
+  Serial.printf("[WS] ws://%s:%d%s\n", WS_HOST, WS_PORT, WS_PATH);
+  ws.begin(WS_HOST, WS_PORT, WS_PATH);
+  ws.onEvent(webSocketEvent);
+  ws.setReconnectInterval(3000);
+  ws.enableHeartbeat(15000, 3000, 2);
+
+  renderState();
+}
+
+// ── Loop ──────────────────────────────────────────────────────────────────────
+void loop() {
+  ws.loop();
+
+  static unsigned long lastTick = 0;
+  if (devState.countdown > 0 && millis() - lastTick >= 1000) {
+    lastTick = millis();
+    if (--devState.countdown == 0) Serial.println("[Timer] done");
+    renderState();
   }
 }

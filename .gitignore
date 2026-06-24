@@ -1,19 +1,47 @@
+# ── Node / Frontend ──────────────────────────────────────────────────────────
 node_modules/
 dist/
 .DS_Store
-.env
-.env.*
-!.env.example
 npm-debug.log*
 coverage/
 *.tsbuildinfo
 
-# Hardware credentials
-hardware/esp32-otter/config.h
+# ── Environment & secrets ─────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.env.local
 
-# Python backend
+# ── Python backend ────────────────────────────────────────────────────────────
 services/backend/.venv/
 services/backend/__pycache__/
-services/backend/*.pyc
+services/backend/**/__pycache__/
+services/backend/**/*.pyc
 services/backend/otter_records.db
+**/__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# ── Hardware credentials (never commit) ──────────────────────────────────────
+hardware/esp32-otter/config.h
 hardware/esp32-otter/micropython/config.py
+hardware/esp32-micropython/config.py
+
+# ── PlatformIO build artifacts ────────────────────────────────────────────────
+hardware/esp32-otter/pio/.pio/
+.pio/
+
+# ── Internal / dev artifacts ──────────────────────────────────────────────────
+work/
+outputs/
+screenshots/
+.claude/
+*.log
+
+# ── Database ──────────────────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
