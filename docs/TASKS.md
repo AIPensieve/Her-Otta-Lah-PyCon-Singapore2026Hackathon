@@ -35,8 +35,9 @@
 - [x] SQLite record store.
 - [x] Device bridge (WebSocket server for ESP32).
 - [x] REST endpoints matching AI contract.
-- [ ] Wire frontend to call Python backend (VITE_API_BASE_URL).
-- [ ] Add /ws/frontend integration in web app DeviceSimulator.
+- [x] Wire frontend to call Python backend (VITE_API_BASE_URL).
+- [x] Add /ws/frontend integration in web app DeviceSimulator.
+- [x] Send SHOW_STEP / SHOW_COMPLETE to device on Breathe/Move step changes.
 
 ## Hardware
 
