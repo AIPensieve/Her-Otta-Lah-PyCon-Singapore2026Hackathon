@@ -7,8 +7,8 @@ Classifies user free-text (Chinese / English / mixed) into:
   - detected mood signals
   - language / locale
 
-Uses rule-based classification by default. When ANTHROPIC_API_KEY is set
-and AI_MODE=real, delegates to Claude for edge cases.
+Uses rule-based classification by default. When OPENAI_API_KEY is set
+and AI_MODE=real, delegates to OpenAI for edge cases.
 """
 from __future__ import annotations
 import os
@@ -120,9 +120,9 @@ def classify(text: str) -> ClassifiedIntent:
     )
 
 
-def classify_with_claude(text: str, client) -> ClassifiedIntent:
+def classify_with_openai(text: str, client) -> ClassifiedIntent:
     """
-    Claude-powered fallback for ambiguous cases.
+    OpenAI-powered fallback for ambiguous cases.
     Falls back to rule-based classify() on any error.
     """
     import json
@@ -138,10 +138,10 @@ Return JSON only:
   "locale": "zh|en|mixed",
   "confidence": 0.0-1.0
 }}"""
-        resp = client.messages.create(
-            model=os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6"),
+        resp = client.chat.completions.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-4o"),
             max_tokens=300,
-            messages=[{"role": "user", "content": prompt}],
+            messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
         )
         data = json.loads(resp.content[0].text)
         return ClassifiedIntent(

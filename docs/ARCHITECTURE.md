@@ -12,7 +12,7 @@
                         │ HTTP REST + WebSocket
 ┌───────────────────────▼─────────────────────────────────┐
 │  Python Backend (FastAPI, services/backend)             │
-│  ├── AI: /ai/* compatibility layer + Claude/mock        │
+│  ├── AI: /ai/* compatibility layer + OpenAI/mock        │
 │  ├── Records: SQLite (otter_records.db)                 │
 │  └── Device Bridge: WebSocket server for ESP32          │
 └───────────────────────┬─────────────────────────────────┘

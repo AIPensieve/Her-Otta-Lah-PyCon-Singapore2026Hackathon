@@ -1,9 +1,17 @@
+import { useState } from "react";
 import type { SuggestedAction } from "@ai-otter/shared-types";
 import { useT } from "../locales";
+import { DemoModal } from "../components/DemoModal";
+
+interface CardModal { title: string; desc: string }
 
 export function MovePage({ activeAction }: { activeAction?: SuggestedAction | null }) {
   const t = useT();
   const m = t.move;
+  const [modal, setModal] = useState<CardModal | null>(null);
+
+  const openCard = (title: string) =>
+    setModal({ title: m.startSession, desc: `${title} — ${m.startSessionDesc}` });
 
   return (
     <div className="move-page">
@@ -27,7 +35,7 @@ export function MovePage({ activeAction }: { activeAction?: SuggestedAction | nu
 
       {/* ── Header ── */}
       <div className="move-header">
-        <button className="move-back-btn">
+        <button className="move-back-btn" onClick={() => { window.location.hash = "#/talk"; }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A6B53" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
@@ -42,7 +50,7 @@ export function MovePage({ activeAction }: { activeAction?: SuggestedAction | nu
         </div>
       </div>
 
-      {/* ── Daily Move Card ── */}
+      {/* ── Daily Stretch Card ── */}
       <div className="move-daily-card">
         <div className="move-daily-tag">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 4 }}>
@@ -62,14 +70,14 @@ export function MovePage({ activeAction }: { activeAction?: SuggestedAction | nu
           <div className="move-daily-otter">
             <img src="/assets/move-daily-otter.png" alt="Daily Otter" />
           </div>
-          <button className="move-play-btn">
+          <button className="move-play-btn" onClick={() => openCard(m.daily_title)}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             {m.daily_start}
           </button>
         </div>
       </div>
 
-      {/* ── Selected Exercises ── */}
+      {/* ── Selected Stretches ── */}
       <div className="move-exercises">
         <h2 className="move-section-title">{m.section_title}</h2>
 
@@ -85,7 +93,7 @@ export function MovePage({ activeAction }: { activeAction?: SuggestedAction | nu
             <p>{m.ex1_desc}</p>
             <div className="move-ex-meta">{m.ex1_meta}</div>
           </div>
-          <button className="move-ex-play">
+          <button className="move-ex-play" onClick={() => openCard(m.ex1_title)}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           </button>
         </div>
@@ -102,7 +110,7 @@ export function MovePage({ activeAction }: { activeAction?: SuggestedAction | nu
             <p>{m.ex2_desc}</p>
             <div className="move-ex-meta">{m.ex2_meta}</div>
           </div>
-          <button className="move-ex-play">
+          <button className="move-ex-play" onClick={() => openCard(m.ex2_title)}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           </button>
         </div>
@@ -119,7 +127,7 @@ export function MovePage({ activeAction }: { activeAction?: SuggestedAction | nu
             <p>{m.ex3_desc}</p>
             <div className="move-ex-meta">{m.ex3_meta}</div>
           </div>
-          <button className="move-ex-play">
+          <button className="move-ex-play" onClick={() => openCard(m.ex3_title)}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           </button>
         </div>
@@ -136,7 +144,7 @@ export function MovePage({ activeAction }: { activeAction?: SuggestedAction | nu
             <p>{m.ex4_desc}</p>
             <div className="move-ex-meta">{m.ex4_meta}</div>
           </div>
-          <button className="move-ex-play">
+          <button className="move-ex-play" onClick={() => openCard(m.ex4_title)}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           </button>
         </div>
@@ -153,12 +161,12 @@ export function MovePage({ activeAction }: { activeAction?: SuggestedAction | nu
             <p>{m.ex5_desc}</p>
             <div className="move-ex-meta">{m.ex5_meta}</div>
           </div>
-          <button className="move-ex-play">
+          <button className="move-ex-play" onClick={() => openCard(m.ex5_title)}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           </button>
         </div>
 
-        <div className="move-exercise-card move-more-card">
+        <button className="move-exercise-card move-more-card" onClick={() => setModal({ title: t.common.comingSoon, desc: t.common.comingSoonDesc })}>
           <div className="move-ex-icon" style={{ background: 'transparent' }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#608A63" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
@@ -170,8 +178,17 @@ export function MovePage({ activeAction }: { activeAction?: SuggestedAction | nu
             <p>{m.more_desc}</p>
           </div>
           <div className="move-more-arrow" />
-        </div>
+        </button>
       </div>
+
+      {modal && (
+        <DemoModal
+          icon="🤸"
+          title={modal.title}
+          desc={modal.desc}
+          onClose={() => setModal(null)}
+        />
+      )}
     </div>
   );
 }

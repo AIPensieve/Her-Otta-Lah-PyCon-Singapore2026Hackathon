@@ -1,6 +1,6 @@
 # AI Otter Coach – Python Backend
 
-FastAPI server that bridges the web app, Claude AI, SQLite records, and the ESP32 device.
+FastAPI server that bridges the web app, OpenAI AI, SQLite records, and the ESP32 device.
 
 ## Quick Start
 
@@ -11,7 +11,7 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# Edit .env – add ANTHROPIC_API_KEY if you want real AI responses
+# Edit .env – add OPENAI_API_KEY if you want real AI responses
 
 python main.py
 # or: uvicorn main:app --reload --host 0.0.0.0 --port 8000
@@ -23,7 +23,7 @@ Server starts at `http://0.0.0.0:8000`.
 
 | Condition | Behavior |
 |-----------|----------|
-| `ANTHROPIC_API_KEY` set | Calls Claude API (`claude-sonnet-4-6`) |
+| `OPENAI_API_KEY` set | Calls OpenAI API (`gpt-4o`) |
 | No API key | Falls back to deterministic mock responses |
 
 The fallback mock uses the same response shapes, so the frontend always works.
@@ -79,7 +79,7 @@ Web App (React)
   → WS /ws/frontend         Live device state
 
 Python Backend (FastAPI)
-  → Anthropic Claude API    (or mock fallback)
+  → OpenAI OpenAI API    (or mock fallback)
   → SQLite otter_records.db
   → WS /ws/device           ESP32 connection
 

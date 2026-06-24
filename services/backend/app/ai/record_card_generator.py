@@ -108,12 +108,12 @@ def generate(
     )
 
 
-def generate_with_claude(
+def generate_with_openai(
     intent: ClassifiedIntent,
     action: RecommendedAction | None,
     client,
 ) -> RecordCardDraft:
-    """Claude-enhanced record card. Falls back to generate() on error."""
+    """OpenAI-enhanced record card. Falls back to generate() on error."""
     import json
     try:
         body = ", ".join(intent.body_signals) or "无"
@@ -132,10 +132,10 @@ def generate_with_claude(
   "mood_tags": ["心情标签列表"]
 }}
 只返回JSON。"""
-        resp = client.messages.create(
-            model=os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6"),
+        resp = client.chat.completions.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-4o"),
             max_tokens=250,
-            messages=[{"role": "user", "content": prompt}],
+            messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
         )
         data = json.loads(resp.content[0].text)
         body_tags_raw = data.get("body_tags", [])

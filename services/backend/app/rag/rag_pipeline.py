@@ -4,7 +4,7 @@ RAG Pipeline — orchestrates retrieval-augmented generation.
 Flow:
   1. Retrieve relevant document chunks (retrieval.py)
   2. Compose a context-aware prompt
-  3. Call Claude API (if available) or return rule-based fallback
+  3. Call OpenAI API (if available) or return rule-based fallback
 
 Used by the intent understanding step when the user's query touches topics
 in the knowledge base (menopause symptoms, exercise safety, calm techniques).
@@ -64,10 +64,10 @@ def run(user_text: str, client=None) -> dict:
     context = retrieve_text(user_text, top_k=3)
     context_used = bool(context)
 
-    # Try Claude if available
+    # Try OpenAI if available
     if client and context_used:
         try:
-            reply = _call_claude(user_text, context, client)
+            reply = _call_openai(user_text, context, client)
             return {
                 "reply": reply,
                 "context_used": True,
@@ -75,7 +75,7 @@ def run(user_text: str, client=None) -> dict:
                 "rag_hint": _extract_skill_hint(context),
             }
         except Exception as e:
-            print(f"[RAG] Claude error: {e} – falling back to rule-based")
+            print(f"[RAG] OpenAI error: {e} – falling back to rule-based")
 
     # Rule-based fallback
     reply = _rule_based_reply(user_text, context)
@@ -87,13 +87,13 @@ def run(user_text: str, client=None) -> dict:
     }
 
 
-def _call_claude(user_text: str, context: str, client) -> str:
+def _call_openai(user_text: str, context: str, client) -> str:
     prompt = _RAG_TEMPLATE.format(context=context, user_text=user_text)
-    resp = client.messages.create(
-        model=os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6"),
+    resp = client.chat.completions.create(
+        model=os.getenv("OPENAI_MODEL", "gpt-4o"),
         max_tokens=300,
-        system=_SYSTEM,
-        messages=[{"role": "user", "content": prompt}],
+        
+        messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
     )
     return resp.content[0].text
 

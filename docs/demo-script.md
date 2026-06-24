@@ -86,7 +86,7 @@ python3 scripts/test_device_ws.py --loop
 - **No medical diagnosis** — disclaimer appears on every response
 - **Bilingual** — try English: "I woke up at 3am and can't sleep"
 - **Always stoppable** — every action has skip/change/later
-- **AI modes** — swap `AI_MODE=real` + `ANTHROPIC_API_KEY` for live Claude responses
+- **AI modes** — swap `AI_MODE=real` + `OPENAI_API_KEY` for live OpenAI responses
 - **RAG ready** — `services/backend/app/rag/` shows the architecture
 
 ---

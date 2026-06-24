@@ -42,7 +42,7 @@
 ## Backend
 
 - [x] Python FastAPI backend (services/backend/).
-- [x] Claude API integration with mock fallback.
+- [x] OpenAI API integration with mock fallback.
 - [x] SQLite record store.
 - [x] Device bridge (WebSocket server for ESP32).
 - [x] REST endpoints matching AI contract.
@@ -52,11 +52,14 @@
 
 ## Hardware
 
-- [x] ESP32-S3-Touch-AMOLED-1.75 firmware (Arduino).
+- [x] ESP32-S3-Touch-AMOLED-1.75 firmware scaffold (Arduino / PlatformIO).
 - [x] WiFi + WebSocket client to Python backend.
-- [x] AMOLED display: idle / listening / breathing / moving / complete screens.
+- [x] Real hardware smoke test: USB CDC serial works with DTR enabled.
+- [x] Real hardware smoke test: ESP32 sends DeviceState to backend over WebSocket.
+- [x] Real hardware smoke test: backend sends DeviceCommand to ESP32 over WebSocket.
 - [x] DeviceCommand JSON handler.
 - [x] DeviceState JSON sender.
+- [ ] Restore AMOLED renderer after confirming exact panel driver and pins.
 - [ ] Test on real hardware – verify AMOLED library include path.
 - [ ] Verify Chinese font rendering on device.
 - [ ] Touch input to confirm/skip on device (future).

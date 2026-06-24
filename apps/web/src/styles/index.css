@@ -1072,6 +1072,8 @@ textarea {
   gap: 6px;
   cursor: pointer;
   z-index: 2;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .move-exercises {
@@ -1525,4 +1527,139 @@ textarea {
 /* Home Page specific styles */
 .home-page {
   padding-bottom: 80px; /* space for nav */
+}
+
+/* ==============================
+   SHARED — bottom nav clearance
+   ============================== */
+
+.tp-content,
+.bp-content,
+.move-exercises,
+.tl-container,
+.me-settings-list,
+.me-feedback-btn {
+  /* ensure content never hides behind bottom nav */
+}
+
+.tp-page,
+.bp-page,
+.move-page,
+.tl-page,
+.me-page {
+  padding-bottom: 96px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* ==============================
+   DEMO MODAL  (shared)
+   ============================== */
+
+.demo-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  backdrop-filter: blur(2px);
+}
+
+.demo-modal {
+  background: #FFFDF7;
+  border-radius: 20px;
+  padding: 32px 24px 24px;
+  max-width: 320px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22);
+}
+
+.demo-modal-icon {
+  font-size: 44px;
+  line-height: 1;
+}
+
+.demo-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1C3B31;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.demo-modal-desc {
+  font-size: 14px;
+  color: #5E826A;
+  margin: 0;
+  line-height: 1.65;
+}
+
+.demo-modal-close {
+  margin-top: 8px;
+  background: #5F875E;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 32px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+  transition: background 0.15s;
+}
+
+.demo-modal-close:active {
+  background: #4a6b4a;
+}
+
+/* ── Make bp-card, tl-card work as buttons ── */
+.bp-card {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+
+.tl-card {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.me-avatar-card,
+.me-setting-item,
+.me-feedback-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  width: 100%;
+}
+
+.move-more-card {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
 }

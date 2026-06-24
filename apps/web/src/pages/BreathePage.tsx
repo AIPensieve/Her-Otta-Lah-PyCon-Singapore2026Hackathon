@@ -1,13 +1,21 @@
+import { useState } from "react";
 import type { SuggestedAction } from "@ai-otter/shared-types";
 import { useT } from "../locales";
+import { DemoModal } from "../components/DemoModal";
+
+interface CardModal { title: string; desc: string }
 
 export function BreathePage({ activeAction }: { activeAction?: SuggestedAction | null }) {
   const t = useT();
   const b = t.breathe;
+  const [modal, setModal] = useState<CardModal | null>(null);
+
+  const openCard = (title: string) =>
+    setModal({ title: b.startSession, desc: `${title} — ${b.startSessionDesc}` });
 
   return (
     <div className="bp-page">
-      {/* ── Status bar (Mocked to match screenshot) ── */}
+      {/* ── Status bar ── */}
       <div className="bp-statusbar">
         <span className="bp-statusbar-time">9:41</span>
         <div className="bp-statusbar-icons">
@@ -27,7 +35,7 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
 
       {/* ── Header ── */}
       <div className="bp-header">
-        <button className="bp-back-btn">
+        <button className="bp-back-btn" onClick={() => { window.location.hash = "#/talk"; }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A6B53" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
@@ -55,7 +63,7 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
             </div>
           </div>
           <div className="bp-cards">
-            <div className="bp-card bp-card-a">
+            <button className="bp-card bp-card-a" onClick={() => openCard(b.a1_title)}>
               <div className="bp-card-info">
                 <h3>{b.a1_title}</h3>
                 <p>{b.a1_desc}</p>
@@ -63,8 +71,8 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
               </div>
               <div className="bp-card-otter"><img src="/assets/breathe-otters/a1.png" alt="otter" /></div>
               <div className="bp-card-arrow" />
-            </div>
-            <div className="bp-card bp-card-a">
+            </button>
+            <button className="bp-card bp-card-a" onClick={() => openCard(b.a2_title)}>
               <div className="bp-card-info">
                 <h3>{b.a2_title} <span className="bp-icon-moon">🌙</span></h3>
                 <p>{b.a2_desc}</p>
@@ -72,8 +80,8 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
               </div>
               <div className="bp-card-otter"><img src="/assets/breathe-otters/a2.png" alt="otter" /></div>
               <div className="bp-card-arrow" />
-            </div>
-            <div className="bp-card bp-card-a">
+            </button>
+            <button className="bp-card bp-card-a" onClick={() => openCard(b.a3_title)}>
               <div className="bp-card-info">
                 <h3>{b.a3_title}</h3>
                 <p>{b.a3_desc}</p>
@@ -81,7 +89,7 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
               </div>
               <div className="bp-card-otter"><img src="/assets/breathe-otters/a3.png" alt="otter" /></div>
               <div className="bp-card-arrow" />
-            </div>
+            </button>
           </div>
         </div>
 
@@ -95,7 +103,7 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
             </div>
           </div>
           <div className="bp-cards">
-            <div className="bp-card bp-card-b">
+            <button className="bp-card bp-card-b" onClick={() => openCard(b.b1_title)}>
               <div className="bp-card-info">
                 <h3>{b.b1_title}</h3>
                 <p>{b.b1_desc}</p>
@@ -103,8 +111,8 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
               </div>
               <div className="bp-card-otter"><img src="/assets/breathe-otters/b1.png" alt="otter" /></div>
               <div className="bp-card-arrow bp-arrow-red" />
-            </div>
-            <div className="bp-card bp-card-b">
+            </button>
+            <button className="bp-card bp-card-b" onClick={() => openCard(b.b2_title)}>
               <div className="bp-card-info">
                 <h3>{b.b2_title}</h3>
                 <p>{b.b2_desc}</p>
@@ -112,15 +120,15 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
               </div>
               <div className="bp-card-otter"><img src="/assets/breathe-otters/b2.png" alt="otter" /></div>
               <div className="bp-card-arrow bp-arrow-red" />
-            </div>
-            <div className="bp-card bp-card-b">
+            </button>
+            <button className="bp-card bp-card-b" onClick={() => openCard(b.b3_title)}>
               <div className="bp-card-info">
                 <h3>{b.b3_title}</h3>
                 <p>{b.b3_desc}</p>
                 <div className="bp-card-time bp-time-red"><span className="bp-icon-clock" /> {b.b3_time}</div>
               </div>
               <div className="bp-card-otter"><img src="/assets/breathe-otters/b3.png" alt="otter" /></div>
-            </div>
+            </button>
           </div>
         </div>
 
@@ -134,7 +142,7 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
             </div>
           </div>
           <div className="bp-cards">
-            <div className="bp-card bp-card-c">
+            <button className="bp-card bp-card-c" onClick={() => openCard(b.c1_title)}>
               <div className="bp-card-info">
                 <h3>{b.c1_title}</h3>
                 <p>{b.c1_desc}</p>
@@ -142,8 +150,8 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
               </div>
               <div className="bp-card-otter"><img src="/assets/breathe-otters/c1.png" alt="otter" /></div>
               <div className="bp-card-arrow bp-arrow-blue" />
-            </div>
-            <div className="bp-card bp-card-c">
+            </button>
+            <button className="bp-card bp-card-c" onClick={() => openCard(b.c2_title)}>
               <div className="bp-card-info">
                 <h3>{b.c2_title}</h3>
                 <p>{b.c2_desc}</p>
@@ -151,8 +159,8 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
               </div>
               <div className="bp-card-otter"><img src="/assets/breathe-otters/c2.png" alt="otter" /></div>
               <div className="bp-card-arrow bp-arrow-blue" />
-            </div>
-            <div className="bp-card bp-card-c">
+            </button>
+            <button className="bp-card bp-card-c" onClick={() => openCard(b.c3_title)}>
               <div className="bp-card-info">
                 <h3>{b.c3_title}</h3>
                 <p>{b.c3_desc}</p>
@@ -160,9 +168,8 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
               </div>
               <div className="bp-card-otter"><img src="/assets/breathe-otters/c3.png" alt="otter" /></div>
               <div className="bp-card-arrow bp-arrow-blue" />
-            </div>
+            </button>
           </div>
-          {/* Pagination dots */}
           <div className="bp-pagination">
             <span className="bp-dot bp-dot-active" />
             <span className="bp-dot" />
@@ -180,7 +187,7 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
             </div>
           </div>
           <div className="bp-cards">
-            <div className="bp-card bp-card-d">
+            <button className="bp-card bp-card-d" onClick={() => openCard(b.d1_title)}>
               <div className="bp-card-info">
                 <h3>{b.d1_title}</h3>
                 <p>{b.d1_desc}</p>
@@ -188,27 +195,36 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
               </div>
               <div className="bp-card-otter"><img src="/assets/breathe-otters/d1.png" alt="otter" /></div>
               <div className="bp-card-arrow bp-arrow-purple" />
-            </div>
-            <div className="bp-card bp-card-d">
+            </button>
+            <button className="bp-card bp-card-d" onClick={() => openCard(b.d2_title)}>
               <div className="bp-card-info">
                 <h3>{b.d2_title}</h3>
                 <p>{b.d2_desc}</p>
                 <div className="bp-card-time bp-time-purple"><span className="bp-icon-clock" /> {b.d2_time}</div>
               </div>
               <div className="bp-card-otter"><img src="/assets/breathe-otters/d2.png" alt="otter" /></div>
-            </div>
-            <div className="bp-card bp-card-d">
+            </button>
+            <button className="bp-card bp-card-d" onClick={() => openCard(b.d3_title)}>
               <div className="bp-card-info">
                 <h3>{b.d3_title}</h3>
                 <p>{b.d3_desc}</p>
                 <div className="bp-card-time bp-time-purple"><span className="bp-icon-clock" /> {b.d3_time}</div>
               </div>
               <div className="bp-card-otter"><img src="/assets/breathe-otters/d3.png" alt="otter" /></div>
-            </div>
+            </button>
           </div>
         </div>
 
       </div>
+
+      {modal && (
+        <DemoModal
+          icon="🌬️"
+          title={modal.title}
+          desc={modal.desc}
+          onClose={() => setModal(null)}
+        />
+      )}
     </div>
   );
 }

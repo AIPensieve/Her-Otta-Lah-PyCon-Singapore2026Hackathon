@@ -48,7 +48,7 @@ from demo_config import DEMO_MODE, AI_MODE
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("[Server] AI Otter Coach backend starting…")
-    print(f"[Server] AI mode: {'Claude API' if ai.using_real_ai else 'Mock'}")
+    print(f"[Server] AI mode: {'OpenAI API' if ai.using_real_ai else 'Mock'}")
     yield
     print("[Server] Shutting down")
 
@@ -572,7 +572,7 @@ def health():
     return {
         "status": "ok",
         "demo_mode": DEMO_MODE,
-        "ai_mode": "claude" if ai.using_real_ai else "mock",
+        "ai_mode": "openai" if ai.using_real_ai else "mock",
         "device_connected": device_bridge.state.connection == "connected",
     }
 

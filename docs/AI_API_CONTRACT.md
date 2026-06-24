@@ -7,7 +7,7 @@ The app uses one app-facing TypeScript contract and multiple replaceable transpo
 | Implementation | Location | When Used |
 |----------------|----------|-----------|
 | TypeScript mock | `services/mock-ai` | Frontend-only demo or backend failure fallback |
-| Python backend | `services/backend` | Local full-stack demo, Claude or mock fallback |
+| Python backend | `services/backend` | Local full-stack demo, OpenAI or mock fallback |
 | Future AI/RAG service | External service behind `/ai/*` | Commercial Agent + RAG + memory service |
 
 Pages should import from `apps/web/src/services/aiService.ts`, not directly from a backend or mock package.
@@ -42,7 +42,7 @@ The primary integration contract for Cloud / AI / RAG work is `/ai/*`.
 | POST | `/ai/memory/action` | Save completed action memory |
 | POST | `/ai/memory/timeline` | Read user timeline memory |
 
-The current local Python backend implements these `/ai/*` endpoints with mock/Claude-compatible behavior. Weekly summary and memory endpoints are lightweight demo implementations; the future AI/RAG service should replace them with real retrieval and long-term storage.
+The current local Python backend implements these `/ai/*` endpoints with mock/OpenAI-compatible behavior. Weekly summary and memory endpoints are lightweight demo implementations; the future AI/RAG service should replace them with real retrieval and long-term storage.
 
 ## `/ai/understand`
 
@@ -359,7 +359,7 @@ Do not build new frontend code against these legacy paths. Use `aiService.ts`.
 
 - If `VITE_API_BASE_URL` is not set, the web app uses `services/mock-ai`.
 - If `VITE_API_BASE_URL` is set but a backend call fails, `aiService.ts` falls back to `services/mock-ai`.
-- If the Python backend has `AI_MODE=real` and `ANTHROPIC_API_KEY`, it tries Claude and falls back to mock on error.
+- If the Python backend has `AI_MODE=real` and `OPENAI_API_KEY`, it tries OpenAI and falls back to mock on error.
 - If `AI_MODE=mock` or no API key is present, the Python backend uses deterministic mock responses.
 
 ## Safety Rules

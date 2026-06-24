@@ -16,7 +16,9 @@ import { deviceAdapter } from "./deviceAdapter";
 
 const BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "";
 const DEFAULT_USER_ID = "u1";
-const SAFETY_DISCLAIMER = "这只是根据记录整理，不是医学诊断。";
+const SAFETY_DISCLAIMER_ZH = "这只是根据记录整理，不是医学诊断。";
+const SAFETY_DISCLAIMER_EN = "This is based on your records only, not medical advice.";
+const SAFETY_DISCLAIMER = SAFETY_DISCLAIMER_ZH;
 
 type ApiLanguage = "zh" | "en" | "zh_en_mixed" | string;
 
@@ -247,7 +249,7 @@ function mapUnderstandResponse(raw: RawUnderstandResponse): AIUnderstandResponse
       id: "fallback", type: "breathe", title: "缓一缓", reason: "",
       estimatedMinutes: 1, pressureLevel: "low", primaryCta: "start", alternatives: [],
     },
-    safetyDisclaimer: SAFETY_DISCLAIMER,
+    safetyDisclaimer: raw.language === "en" ? SAFETY_DISCLAIMER_EN : SAFETY_DISCLAIMER_ZH,
     safetyLevel:      raw.safety_level,
     wantsRecord:      raw.wants_record ?? raw.record_suggestion,
     recordSuggestion: raw.record_suggestion,
@@ -304,8 +306,10 @@ function mapCompletionResponse(raw: Record<string, unknown>, action: SuggestedAc
 export const webAiService = {
   understandUserInput: (input: UserInput): Promise<AIUnderstandResponse> =>
     post<RawUnderstandResponse>("/ai/understand", {
-      user_id: DEFAULT_USER_ID,
-      text:    input.text,
+      user_id:  DEFAULT_USER_ID,
+      text:     input.text,
+      language: input.locale === "en-SG" ? "en" : "zh",
+      locale:   input.locale,
       remember: true,
     }).then(mapUnderstandResponse),
 

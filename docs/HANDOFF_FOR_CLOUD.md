@@ -1,4 +1,4 @@
-# Handoff For Cloud / Claude
+# Handoff For Cloud / OpenAI
 
 ## Current Status
 

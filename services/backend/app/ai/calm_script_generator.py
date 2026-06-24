@@ -2,7 +2,7 @@
 Calm Script Generator — returns CalmScriptSchema for a breathing / calm skill.
 
 Pulls prompts from skill_registry for registered skills.
-Claude enhancement for custom calm sessions not in the registry.
+OpenAI enhancement for custom calm sessions not in the registry.
 """
 from __future__ import annotations
 import os
@@ -68,9 +68,9 @@ def generate(skill_id: str) -> CalmScriptSchema | None:
     )
 
 
-def generate_with_claude(skill_id: str, title: str, tone: str, client) -> CalmScriptSchema:
+def generate_with_openai(skill_id: str, title: str, tone: str, client) -> CalmScriptSchema:
     """
-    Claude-generated calm script for custom sessions.
+    OpenAI-generated calm script for custom sessions.
     Falls back to a generic 4-prompt breathing script on error.
     """
     import json
@@ -91,10 +91,10 @@ def generate_with_claude(skill_id: str, title: str, tone: str, client) -> CalmSc
   ]
 }}
 只返回JSON。"""
-        resp = client.messages.create(
-            model=os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6"),
+        resp = client.chat.completions.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-4o"),
             max_tokens=400,
-            messages=[{"role": "user", "content": prompt}],
+            messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
         )
         data = json.loads(resp.content[0].text)
         prompts = [

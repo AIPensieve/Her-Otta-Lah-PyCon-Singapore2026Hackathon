@@ -2,7 +2,7 @@
 Demo configuration — read from environment or .env.
 DEMO_MODE=true  → guaranteed stable; always fallback to mock on any error
 AI_MODE=mock    → keyword rules only
-AI_MODE=real    → try Claude API, fallback to mock on timeout/error
+AI_MODE=real    → try OpenAI API, fallback to mock on timeout/error
 """
 import os
 

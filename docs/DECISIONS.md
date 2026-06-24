@@ -72,3 +72,19 @@ Decision:
 Reason:
 
 The ESP32-S3-Touch-AMOLED-1.75 has a screen, buttons/touch, and IMU signals available for simple game feedback, but it should not run AI or heavyweight game logic.
+
+## 2026-06-24: Hardware Bring-Up Uses A No-Display WebSocket Bridge First
+
+The AMOLED driver is still unresolved, but the Hackathon chain test needs a reliable way to verify the real board can receive app/backend commands.
+
+Decision:
+
+- Use a PlatformIO Arduino firmware under `hardware/esp32-otter/pio/` for current ESP32-S3 bring-up.
+- Use `board = esp32s3box` and `ARDUINO_USB_CDC_ON_BOOT=1` for native USB CDC serial on this board.
+- Do not block the first hardware integration loop on the AMOLED renderer.
+- Keep the current smoke firmware focused on USB CDC, Wi-Fi, WebSocket, `DeviceCommand` handling, and `DeviceState` sending.
+- Read serial with DTR enabled; otherwise USB CDC can appear silent even when the firmware is running.
+
+Reason:
+
+This separates two risks: hardware communication and physical screen rendering. The board is now confirmed to connect to Wi-Fi, connect to the backend WebSocket, send `DeviceState`, and receive backend `DeviceCommand`. The remaining hardware risk is the exact AMOLED driver/pin configuration.

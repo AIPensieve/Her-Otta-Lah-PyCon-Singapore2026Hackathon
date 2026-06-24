@@ -3,7 +3,7 @@ Exercise Plan Generator — returns a structured ExercisePlanSchema for a given 
 
 Pulls steps directly from the skill_registry so the plan is always
 consistent with what the backend serves via /api/skills/{skill_id}.
-Claude enhancement available for skills not in the registry.
+OpenAI enhancement available for skills not in the registry.
 """
 from __future__ import annotations
 import os
@@ -61,9 +61,9 @@ def generate(skill_id: str) -> ExercisePlanSchema | None:
     )
 
 
-def generate_with_claude(skill_id: str, title: str, client) -> ExercisePlanSchema:
+def generate_with_openai(skill_id: str, title: str, client) -> ExercisePlanSchema:
     """
-    Claude-generated plan for skills not in the registry.
+    OpenAI-generated plan for skills not in the registry.
     Falls back to a generic 4-step plan on error.
     """
     import json
@@ -86,10 +86,10 @@ def generate_with_claude(skill_id: str, title: str, client) -> ExercisePlanSchem
   ]
 }}
 只返回JSON。"""
-        resp = client.messages.create(
-            model=os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6"),
+        resp = client.chat.completions.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-4o"),
             max_tokens=400,
-            messages=[{"role": "user", "content": prompt}],
+            messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
         )
         data = json.loads(resp.content[0].text)
         steps = [

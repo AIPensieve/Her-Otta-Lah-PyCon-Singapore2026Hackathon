@@ -136,7 +136,12 @@ export function useSpeech() {
     };
   }, []);
 
-  const speak = (text: string) => {
+  /**
+   * Speak text using the given language.
+   * langOverride forces TTS voice language regardless of text content.
+   * Without it, language is inferred from character detection.
+   */
+  const speak = (text: string, langOverride?: "zh-CN" | "en-US") => {
     abortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac;
@@ -144,7 +149,7 @@ export function useSpeech() {
     stopCurrent();
 
     const isChinese = /[一-鿿]/.test(text);
-    const lang: "zh-CN" | "en-US" = isChinese ? "zh-CN" : "en-US";
+    const lang: "zh-CN" | "en-US" = langOverride ?? (isChinese ? "zh-CN" : "en-US");
 
     elevenLabsSpeak(text, ac.signal).then((ok) => {
       if (!ok && !ac.signal.aborted) {

@@ -5,42 +5,46 @@ import { deviceAdapter } from "../services/deviceAdapter";
 import { useSpeech } from "../hooks/useSpeech";
 import { useT, useLang } from "../locales";
 
+type LocationStep = "confirm" | "success";
+
 export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedAction) => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<AIUnderstandResponse | null>(null);
+  const [locationStep, setLocationStep] = useState<LocationStep | null>(null);
   const { speak } = useSpeech();
   const t = useT();
   const { lang, toggleLang } = useLang();
+  const ttsLang = lang === "en" ? "en-US" as const : "zh-CN" as const;
+  const locale = lang === "en" ? "en-SG" as const : "zh-SG" as const;
 
   const submit = async (value: string) => {
     const clean = value.trim();
     if (!clean) return;
-    deviceAdapter.setListening("我在听");
+    deviceAdapter.setListening(lang === "zh" ? "我在听" : "Listening…");
     setIsLoading(true);
     setResponse(null);
     const input: UserInput = {
       id: `input_${Date.now()}`,
       text: clean,
       inputMode: "typed",
-      locale: "mixed",
+      locale,
       createdAt: new Date().toISOString()
     };
-    deviceAdapter.setThinking("整理中");
+    deviceAdapter.setThinking(lang === "zh" ? "整理中" : "Thinking…");
     const result = await aiAgentService.understandUserInput(input);
     setResponse(result);
     setIsLoading(false);
-    // Speak the otter's crafted line (pet_voice_text from backend, or reply)
     const voiceLine = result.petVoiceText ?? result.reply;
-    if (voiceLine) setTimeout(() => speak(voiceLine), 300);
+    if (voiceLine) setTimeout(() => speak(voiceLine, ttsLang), 300);
   };
 
   const clearResponse = () => {
     setResponse(null);
     deviceAdapter.showWatchface({
       screen: "default",
-      title: "默认陪伴",
-      subtitle: "我在这里陪着你",
-      locale: "mixed",
+      title: lang === "zh" ? "默认陪伴" : "Companion",
+      subtitle: lang === "zh" ? "我在这里陪着你" : "I'm right here with you",
+      locale,
       lightMode: "soft",
       vibration: "none",
     });
@@ -50,7 +54,7 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
     return (
       <div className="tp-page">
         <div className="tp-loading">
-          <p className="tp-loading-text">{lang === "zh" ? "小水獭正在思考…" : "Otter is thinking…"}</p>
+          <p className="tp-loading-text">{t.talk.thinking}</p>
         </div>
       </div>
     );
@@ -88,19 +92,16 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
 
   return (
     <div className="tp-page">
-      {/* ── Status bar (Mocked to match screenshot) ── */}
+      {/* ── Status bar ── */}
       <div className="tp-statusbar">
         <span className="tp-statusbar-time">9:41</span>
         <div className="tp-statusbar-icons">
-          {/* Signal */}
           <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M1 11h2v-2H1v2zm4 0h2v-4H5v4zm4 0h2v-7H9v7zm4 0h2V1h-2v10z"/>
           </svg>
-          {/* WiFi */}
           <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M1 5.5c4-4 10-4 14 0M3.5 8c2.5-2.5 6.5-2.5 9 0M8 11.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1z"/>
           </svg>
-          {/* Battery */}
           <svg width="24" height="12" viewBox="0 0 24 12" fill="none" stroke="currentColor" strokeWidth="1.5">
             <rect x="1" y="1" width="20" height="10" rx="2.5"/>
             <path d="M23 4v4" strokeLinecap="round"/>
@@ -112,7 +113,9 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
       {/* ── Header ── */}
       <div className="tp-header">
         <div className="tp-header-left">
-          <h1 className="tp-greeting">早上好！<span className="tp-sun">☀️</span><br />我在这里陪着你</h1>
+          <h1 className="tp-greeting">
+            {t.talk.greetingMorning}<br />{t.talk.greetingCompanion}
+          </h1>
           <div className="tp-badges">
             <div className="tp-badge tp-badge-gray">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A6B53" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -147,7 +150,6 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
 
       {/* ── Hero Image ── */}
       <div className="tp-hero">
-        {/* We use the extracted otter-hero-new image here. Since it includes the green background natively from the sprite sheet crop, it fits perfectly. */}
         <img src="/assets/otter-hero-new.png" alt="Otter" className="tp-hero-img" />
       </div>
 
@@ -158,10 +160,10 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
           <p className="tp-prompt-subtitle">{t.talk.subtitle}</p>
         </div>
 
-        <button 
+        <button
           className="tp-hold-btn"
           onClick={() => {
-            const val = window.prompt(t.talk.simulateVoice, lang === "zh" ? "我有点累" : "I'm feeling a bit tired");
+            const val = window.prompt(t.talk.simulateVoice, t.talk.quickTiredInput);
             if (val) submit(val);
           }}
         >
@@ -171,31 +173,31 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
             <line x1="12" y1="19" x2="12" y2="22"></line>
           </svg>
           <div className="tp-hold-text">
-            <span className="tp-hold-title">{lang === "zh" ? "按住说话" : "Hold to Talk"}</span>
-            <span className="tp-hold-subtitle">{lang === "zh" ? "松手结束" : "Release to Send"}</span>
+            <span className="tp-hold-title">{t.talk.holdTitle}</span>
+            <span className="tp-hold-subtitle">{t.talk.holdSubtitle}</span>
           </div>
         </button>
 
         <div className="tp-grid">
-          <button className="tp-grid-item tp-grid-green" onClick={() => submit(lang === "zh" ? "我有点累，想缓一缓" : "I'm feeling tired and need a breather")}>
+          <button className="tp-grid-item tp-grid-green" onClick={() => submit(t.talk.quickTiredInput)}>
             <span className="tp-grid-icon">🦦</span>
-            <span className="tp-grid-text">{lang === "zh" ? "我有点累" : "Feeling tired"}</span>
+            <span className="tp-grid-text">{t.talk.quickTired}</span>
           </button>
-          <button className="tp-grid-item tp-grid-orange" onClick={() => submit(lang === "zh" ? "肩颈很紧，久坐了，想动一动" : "My neck and shoulders are so stiff from sitting")}>
+          <button className="tp-grid-item tp-grid-orange" onClick={() => submit(t.talk.quickNeckInput)}>
             <span className="tp-grid-icon">🤸</span>
-            <span className="tp-grid-text">{lang === "zh" ? "肩颈很紧" : "Stiff neck"}</span>
+            <span className="tp-grid-text">{t.talk.quickNeck}</span>
           </button>
-          <button className="tp-grid-item tp-grid-purple" onClick={() => submit(lang === "zh" ? "夜醒了，睡不着，能陪我吗" : "Woke up in the night and can't get back to sleep")}>
+          <button className="tp-grid-item tp-grid-purple" onClick={() => submit(t.talk.quickSleepInput)}>
             <span className="tp-grid-icon">🌙</span>
-            <span className="tp-grid-text">{lang === "zh" ? "夜醒睡不着" : "Can't sleep"}</span>
+            <span className="tp-grid-text">{t.talk.quickSleep}</span>
           </button>
-          <button className="tp-grid-item tp-grid-orange" onClick={() => submit(lang === "zh" ? "热醒了，潮热出汗，帮我缓缓" : "Hot flash woke me up, need to cool down")}>
+          <button className="tp-grid-item tp-grid-orange" onClick={() => submit(t.talk.quickHotInput)}>
             <span className="tp-grid-icon">🌡️</span>
-            <span className="tp-grid-text">{lang === "zh" ? "热醒了" : "Hot flash"}</span>
+            <span className="tp-grid-text">{t.talk.quickHot}</span>
           </button>
         </div>
 
-        <button className="tp-record-link">
+        <button className="tp-record-link" onClick={() => { window.location.hash = "#/timeline"; }}>
           <div className="tp-record-left">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A6B53" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -209,14 +211,93 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
               <path d="M12 18h.01"></path>
               <path d="M16 18h.01"></path>
             </svg>
-            <span>{lang === "zh" ? "今天还没有记录" : "No check-ins yet today"}</span>
+            <span>{t.talk.noRecord}</span>
           </div>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B0B5B1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </button>
+
+        {/* ── Share Location ── */}
+        <button className="tp-location-btn" onClick={() => setLocationStep("confirm")}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <span>{t.talk.shareLocation}</span>
+        </button>
       </div>
 
+      {/* ── Location Share Modal ── */}
+      {locationStep && (
+        <div className="demo-modal-overlay" onClick={() => setLocationStep(null)}>
+          <div className="demo-modal" onClick={(e) => e.stopPropagation()}>
+            {locationStep === "confirm" ? (
+              <>
+                <div className="demo-modal-icon">📍</div>
+                <p className="demo-modal-title">{t.talk.shareLocationModalTitle}</p>
+                <div className="tp-location-card">
+                  <div className="tp-location-addr">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#638A5A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <span>{t.talk.shareLocationModalAddr}</span>
+                  </div>
+                  <div className="tp-location-contact">
+                    <span className="tp-location-label">{t.talk.shareLocationModalWith}</span>
+                    <span className="tp-location-name">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#638A5A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                      </svg>
+                      {t.talk.shareLocationModalContact}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  className="demo-modal-close"
+                  style={{ background: '#4A6B53' }}
+                  onClick={() => setLocationStep("success")}
+                >
+                  {t.talk.shareLocationConfirm}
+                </button>
+                <button
+                  className="demo-modal-close"
+                  style={{ background: 'transparent', color: '#889891', fontSize: 13, marginTop: 0 }}
+                  onClick={() => setLocationStep(null)}
+                >
+                  {t.common.skip}
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="demo-modal-icon">✅</div>
+                <p className="demo-modal-title">{t.talk.shareLocationSuccess}</p>
+                <p className="demo-modal-desc">{t.talk.shareLocationSuccessDesc}</p>
+                <div className="tp-location-card" style={{ width: '100%' }}>
+                  <div className="tp-location-addr">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#638A5A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <span>{t.talk.shareLocationModalAddr}</span>
+                  </div>
+                  <div className="tp-location-contact">
+                    <span className="tp-location-label">{t.talk.shareLocationModalWith}</span>
+                    <span className="tp-location-name" style={{ color: '#638A5A' }}>
+                      ✓ {t.talk.shareLocationModalContact}
+                    </span>
+                  </div>
+                </div>
+                <button className="demo-modal-close" onClick={() => setLocationStep(null)}>
+                  {t.common.close}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
