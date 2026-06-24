@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { AIUnderstandResponse, SuggestedAction, UserInput } from "@ai-otter/shared-types";
-import { aiAgentService } from "@ai-otter/mock-ai";
+import { aiService as aiAgentService } from "../services/aiService";
 
 export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedAction) => void }) {
   const [isLoading, setIsLoading] = useState(false);

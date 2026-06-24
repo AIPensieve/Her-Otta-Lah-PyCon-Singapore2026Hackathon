@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { RecordCard } from "@ai-otter/shared-types";
 import { PageShell, Panel } from "@ai-otter/ui";
-import { recordRepository } from "../store/localRecords";
+import { recordService as recordRepository } from "../services/recordService";
 import { RecordCardUI } from "../components/RecordCardUI";
 
 export function TimelinePage() {

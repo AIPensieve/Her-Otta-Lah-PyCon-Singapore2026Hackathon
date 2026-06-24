@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import type { ActionCompletionResponse, CalmScript, SuggestedAction } from "@ai-otter/shared-types";
-import { aiAgentService } from "@ai-otter/mock-ai";
 import { Button, PageShell, Panel } from "@ai-otter/ui";
 import { SaveRecordPrompt } from "../components/SaveRecordPrompt";
-import { recordRepository } from "../store/localRecords";
 import { LoadingSpinner } from "../components/LoadingStates";
+import { aiService as aiAgentService } from "../services/aiService";
+import { recordService as recordRepository } from "../services/recordService";
+import { deviceSimulator } from "../services/deviceSimulator";
 
 const fallbackAction: SuggestedAction = {
   id: "action_breathe_default",
@@ -31,7 +32,18 @@ export function BreathePage({ activeAction }: { activeAction: SuggestedAction | 
     setSaved(false);
   }, [action]);
 
+  const goToStep = (next: number) => {
+    setStep(next);
+    if (script) {
+      deviceSimulator.sendCommand({
+        type: "SHOW_STEP",
+        payload: { text: script.prompts[next]?.text ?? "", stepNum: next + 1, totalSteps: script.prompts.length, mode: "breathe" }
+      });
+    }
+  };
+
   const complete = async () => {
+    deviceSimulator.sendCommand({ type: "SHOW_COMPLETE", payload: { message: "呼吸完成，做得很好！" } });
     setCompletion(await aiAgentService.completeAction(action));
     setSaved(false);
   };
@@ -64,8 +76,8 @@ export function BreathePage({ activeAction }: { activeAction: SuggestedAction | 
           </div>
           
           <div className="mt-6 grid grid-cols-2 gap-3">
-            <Button tone="secondary" onClick={() => setStep((value) => Math.max(0, value - 1))}>上一步</Button>
-            <Button onClick={() => setStep((value) => Math.min((script.prompts.length) - 1, value + 1))}>下一步</Button>
+            <Button tone="secondary" onClick={() => goToStep(Math.max(0, step - 1))}>上一步</Button>
+            <Button onClick={() => goToStep(Math.min(script.prompts.length - 1, step + 1))}>下一步</Button>
           </div>
           
           <Button className="mt-4 w-full bg-slate-900 text-white active:bg-slate-800" onClick={complete}>完成并记录</Button>
