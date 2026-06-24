@@ -1,12 +1,6 @@
 <div align="center">
-  <img src="docs/assets/logo.png" alt="Her Otta Lah Logo" width="150" />
   <h1>🦦 Her Otta · Lah</h1>
   <p><strong>Singapore OtterAI Menopause Companion</strong></p>
-  
-  [![PyCon SG 2026](https://img.shields.io/badge/PyCon_SG_2026-Hackathon-blue?style=for-the-badge)](https://pycon.sg)
-  [![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-  [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org)
-  [![ESP32](https://img.shields.io/badge/ESP32-E7352C?style=for-the-badge&logo=espressif&logoColor=white)](https://www.espressif.com/)
 </div>
 
 <br/>
@@ -27,9 +21,8 @@ Shaped as Singapore's beloved icon—the local Otter—our virtual pet acts as a
 > *It helps users say things out loud, calm down, move gently, and build a consented body/mood timeline. It does not diagnose, prescribe, or replace clinicians.*
 
 <div align="center">
-  <img src="docs/assets/screenshot1.png" alt="App Screenshot 1" width="30%" />
-  <img src="docs/assets/screenshot2.png" alt="App Screenshot 2" width="30%" />
-  <img src="docs/assets/screenshot3.png" alt="App Screenshot 3" width="30%" />
+  <img src="docs/assets/watchface1.png" alt="Watch UI 1" width="45%" />
+  <img src="docs/assets/watchface2.png" alt="Watch UI 2" width="45%" />
 </div>
 
 ---
@@ -39,22 +32,17 @@ Shaped as Singapore's beloved icon—the local Otter—our virtual pet acts as a
 - **Process & Product**: Voice-first flow from “say something” to one small action, record card, and optional timeline.
 - **Data Quality**: No questionable scraped health datasets; transparent seed RAG plus consented local-first records.
 - **User Focus**: Large-action, low-pressure, culturally local Singapore women's tone for 45+ Singapore users.
-- **Technical Execution**: FastAPI, RAG-ready knowledge base, safety boundary, strict JSON contracts, hardware directives, Pygame accessible micro-game, and hybrid sponsor architecture.
-
-### Sponsor Alignment
-- **AI Singapore / SEA-LION**: Singlish, Malay, and dialect-aware language normalization and future embeddings.
-- **Google Cloud SG / Vertex AI**: Multimodal scene understanding and Cloud Run deployment target.
-- **OpenAI**: Structured Outputs path for reliable JSON to App and hardware.
+- **Technical Execution**: FastAPI, RAG-ready knowledge base, safety boundary, strict JSON contracts, hardware directives, Pygame accessible micro-game, and hybrid architecture.
 
 ---
 
 ## 🛠 Technical Execution & Tooling Integration
 
-Our solution achieves high-quality data integrity and multi-modal technical excellence by seamlessly composing the advanced ecosystems of all three hackathon sponsors:
+Our solution achieves high-quality data integrity and multi-modal technical excellence:
 
-1. **AI Singapore (AISG) Standards**: We applied the multi-lingual and cultural principles behind the SEA-LION (Southeast Asian Languages in One Network) framework. By infusing specialized Singaporean linguistic corpora (Singlish, Malay phrases like *sakit*, *makan*, and dialects) into our semantic understanding layer, our RAG model prevents clinical categorization failures caused by localized vernacular.
-2. **Google Cloud SG**: We utilized Vertex AI (Gemini 1.5 Flash) to empower seniors with seamless multi-modal accessibility. Users can take a photo of their immediate living environment (e.g., a living room chair), and Gemini instantaneously extracts spatial cues to evaluate immediate fall-risks and environment safety. The entire application is containerized and micro-managed via Google Cloud Run to handle secure logging.
-3. **OpenAI**: To guarantee that creative multi-lingual outputs never crash the application layer, we leveraged OpenAI's Structured Outputs (`response_format`) via GPT-4o. This strictly constrains the output into a deterministic, markdown-free JSON schema containing executable, on-the-fly Python Pygame code blocks alongside large-font localized user notifications.
+1. **Local Language Understanding**: We applied the multi-lingual and cultural principles behind the SEA-LION (Southeast Asian Languages in One Network) framework. By infusing specialized Singaporean linguistic corpora (Singlish, Malay phrases like *sakit*, *makan*, and dialects) into our semantic understanding layer, our RAG model prevents clinical categorization failures caused by localized vernacular.
+2. **Multimodal Scene Analysis**: We utilized Gemini 1.5 Flash to empower seniors with seamless multi-modal accessibility. Users can take a photo of their immediate living environment (e.g., a living room chair), and the AI instantaneously extracts spatial cues to evaluate immediate fall-risks and environment safety. The entire application is containerized and micro-managed via Google Cloud Run to handle secure logging.
+3. **Structured Outputs Constraint**: To guarantee that creative multi-lingual outputs never crash the application layer, we leveraged OpenAI's Structured Outputs (`response_format`) via GPT-4o. This strictly constrains the output into a deterministic, markdown-free JSON schema containing executable, on-the-fly Python Pygame code blocks alongside large-font localized user notifications.
 
 ---
 
