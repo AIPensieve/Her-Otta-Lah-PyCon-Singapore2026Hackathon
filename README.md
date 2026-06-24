@@ -23,6 +23,10 @@ Shaped as Singapore's beloved icon—the local Otter—our virtual pet acts as a
   <img src="docs/assets/watchface1.png" alt="Watch UI 1" width="45%" />
   <img src="docs/assets/watchface2.png" alt="Watch UI 2" width="45%" />
 </div>
+<br/>
+<div align="center">
+  <img src="docs/assets/ui_flow.png" alt="App UI Flowchart" width="100%" />
+</div>
 
 ---
 
