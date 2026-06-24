@@ -135,17 +135,20 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
 
       {/* ── Shortcut chips ── */}
       <div className="tp-chips">
-        <button className="tp-chip" onClick={() => submit("我有点累")}>
-          <span className="tp-chip-icon">🔋</span> 我有点累
+        {/* Demo Route 1: emotion → breathing_60s */}
+        <button className="tp-chip" onClick={() => submit("我今天很烦，昨晚也没睡好。")}>
+          <span className="tp-chip-icon">😮‍💨</span> 烦躁睡不好
         </button>
-        <button className="tp-chip" onClick={() => submit("陪我缓一缓")}>
-          <span className="tp-chip-icon">🍃</span> 陪我缓一缓
+        {/* Demo Route 2: body → neck_relax_3min */}
+        <button className="tp-chip" onClick={() => submit("我肩颈很紧，想动一下。")}>
+          <span className="tp-chip-icon">💆</span> 肩颈很紧
+        </button>
+        {/* Demo Route 3: night / hot flash → hot_flash_calm */}
+        <button className="tp-chip" onClick={() => submit("我昨晚三点热醒了，后来心跳有点快。")}>
+          <span className="tp-chip-icon">🌙</span> 夜里热醒
         </button>
         <button className="tp-chip" onClick={() => submit("想动一动")}>
           <span className="tp-chip-icon">🏃‍♀️</span> 想动一动
-        </button>
-        <button className="tp-chip" onClick={() => submit("昨晚没睡好")}>
-          <span className="tp-chip-icon">🌙</span> 昨晚没睡好
         </button>
       </div>
 

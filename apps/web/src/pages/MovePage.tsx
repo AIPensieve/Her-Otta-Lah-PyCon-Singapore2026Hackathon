@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import type { ActionCompletionResponse, ExercisePlan, SuggestedAction } from "@ai-otter/shared-types";
+import type { ActionCompletionResponse, ExercisePlan, SuggestedAction, DeviceScreenState } from "@ai-otter/shared-types";
 import { Button, PageShell } from "@ai-otter/ui";
 import { SaveRecordPrompt } from "../components/SaveRecordPrompt";
 import { LoadingSpinner } from "../components/LoadingStates";
 import { OtterIllustration } from "../components/OtterIllustration";
 import { aiService as aiAgentService } from "../services/aiService";
 import { recordService as recordRepository } from "../services/recordService";
-import { deviceSimulator } from "../services/deviceSimulator";
+import { deviceAdapter } from "../services/deviceAdapter";
+import { getSkill } from "../data/skillRegistry";
 
 const fallbackAction: SuggestedAction = {
   id: "action_move_default",
@@ -16,8 +17,24 @@ const fallbackAction: SuggestedAction = {
   estimatedMinutes: 2,
   pressureLevel: "very-low",
   primaryCta: "start",
-  alternatives: ["skip", "change", "later"]
+  alternatives: ["skip", "change", "later"],
+  skillId: "neck_relax_3min",
 };
+
+function skillToExercisePlan(action: SuggestedAction): ExercisePlan | null {
+  const skill = action.skillId ? getSkill(action.skillId) : null;
+  if (!skill || skill.type !== "move") return null;
+  return {
+    id: `skill_${skill.skill_id}`,
+    actionId: action.id,
+    title: skill.title_zh,
+    durationSeconds: skill.duration_seconds,
+    intensity: "gentle",
+    avoidIf: ["明显疼痛", "头晕", "胸闷", "医生建议避免活动"],
+    steps: skill.steps.map((s) => ({ id: s.step_id, instruction: s.instruction_zh, seconds: s.duration_seconds })),
+    safetyDisclaimer: skill.safety_note_zh,
+  };
+}
 
 export function MovePage({ activeAction }: { activeAction: SuggestedAction | null }) {
   const action = activeAction?.type === "move" ? activeAction : fallbackAction;
@@ -28,23 +45,37 @@ export function MovePage({ activeAction }: { activeAction: SuggestedAction | nul
 
   useEffect(() => {
     setPlan(null);
-    aiAgentService.createExercisePlan(action).then(setPlan);
     setCompletion(null);
     setSaved(false);
+    setStep(0);
+
+    // Use skill registry first (guaranteed stable); fall back to AI
+    const fromRegistry = skillToExercisePlan(action);
+    if (fromRegistry) {
+      setPlan(fromRegistry);
+    } else {
+      aiAgentService.createExercisePlan(action).then(setPlan);
+    }
   }, [action]);
 
   const goToStep = (next: number) => {
     setStep(next);
     if (plan) {
-      deviceSimulator.sendCommand({
-        type: "SHOW_STEP",
-        payload: { text: plan.steps[next]?.instruction ?? "", stepNum: next + 1, totalSteps: plan.steps.length, mode: "move" }
+      const skill = action.skillId ? getSkill(action.skillId) : null;
+      const rawState = (skill?.steps[next]?.screen_state ?? "exercise_countdown") as DeviceScreenState;
+      deviceAdapter.showStep({
+        state: rawState,
+        text: plan.steps[next]?.instruction ?? "",
+        stepNum: next + 1,
+        totalSteps: plan.steps.length,
+        durationSeconds: plan.steps[next]?.seconds ?? 30,
+        mode: "move",
       });
     }
   };
 
   const complete = async () => {
-    deviceSimulator.sendCommand({ type: "SHOW_COMPLETE", payload: { message: "活动完成，做得很好！" } });
+    deviceAdapter.showComplete("活动完成，做得很好！");
     setCompletion(await aiAgentService.completeAction(action));
     setSaved(false);
   };
@@ -76,18 +107,11 @@ export function MovePage({ activeAction }: { activeAction: SuggestedAction | nul
             <div className="absolute inset-0 rounded-full bg-[#dfe8d2] shadow-[inset_0_0_0_1px_rgba(68,111,77,0.12)]" />
             <div
               className="absolute inset-2 rounded-full opacity-95"
-              style={{
-                background: `conic-gradient(#4b7a5a ${progress}%, rgba(255,255,255,0.76) ${progress}% 100%)`
-              }}
+              style={{ background: `conic-gradient(#4b7a5a ${progress}%, rgba(255,255,255,0.76) ${progress}% 100%)` }}
             />
             <div className="absolute inset-8 rounded-full bg-[#f1ecd9]" />
             <div className="absolute inset-10 rounded-full border-[10px] border-white/78" />
-            <OtterIllustration
-              variant="default"
-              size="card"
-              alt="小水獭动作引导"
-              className="relative z-[1] scale-[1.5]"
-            />
+            <OtterIllustration variant="default" size="card" alt="小水獭动作引导" className="relative z-[1] scale-[1.5]" />
           </div>
 
           <div className="mt-5">
@@ -136,7 +160,7 @@ export function MovePage({ activeAction }: { activeAction: SuggestedAction | nul
           </p>
         </section>
       )}
-      
+
       {completion && (
         <SaveRecordPrompt
           completion={completion}

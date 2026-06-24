@@ -68,12 +68,20 @@ def init_display():
 def display_update(screen_state, text=""):
     """Placeholder: print to Serial until real display driver is available."""
     icons = {
-        "idle":      "🦦 IDLE",
-        "listening": "🎙️  LISTENING",
-        "breathing": "🌿 BREATHING",
-        "moving":    "🏃 MOVING",
+        "idle":               "[idle]     IDLE",
+        "listening":          "[listen]   LISTENING",
+        "thinking":           "[think]    THINKING",
+        "breathing":          "[breathe]  BREATHING",
+        "moving":             "[move]     MOVING",
+        "sleeping":           "[sleep]    SLEEPING",
+        "night_calm":         "[night]    NIGHT CALM",
+        "hot_flash_calm":     "[hot]      HOT FLASH CALM",
+        "exercise_countdown": "[exercise] EXERCISE",
+        "next_move":          "[next]     NEXT MOVE",
+        "reminder":           "[remind]   REMINDER",
+        "low_battery":        "[bat]      LOW BATTERY",
     }
-    label = icons.get(screen_state, screen_state.upper())
+    label = icons.get(screen_state, f"[{screen_state}]")
     print(f"[Screen] {label}  {text}")
 
 
@@ -139,6 +147,22 @@ def handle_command(raw: str) -> bool:
     elif t == "VIBRATE":
         pattern = p.get("pattern", "short")
         print(f"[VIB] {pattern} (no motor on this board)")
+
+    elif t == "DEVICE_STATE":
+        # Unified state command — preferred for new code
+        new_state  = p.get("state", "idle")
+        screen_txt = p.get("screen_text", "")
+        voice_txt  = p.get("voice_text", "")
+        duration   = p.get("duration_seconds", 0)
+        vib        = p.get("vibration", "none")
+        state["screenState"] = new_state
+        display_update(new_state, screen_txt)
+        if voice_txt:
+            print(f"[Voice] {voice_txt}")
+        if duration:
+            print(f"[Timer] {duration}s")
+        if vib != "none":
+            print(f"[VIB] {vib}")
 
     else:
         print(f"[CMD] Unknown type: {t}")

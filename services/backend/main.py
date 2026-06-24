@@ -35,6 +35,8 @@ from models import (
 from ai_service import AiService
 from record_store import RecordStore
 from device_bridge import device_bridge
+from skill_registry import all_skills, get_skill
+from demo_config import DEMO_MODE, AI_MODE
 
 
 # ---------------------------------------------------------------------------
@@ -145,10 +147,37 @@ async def ws_frontend(ws: WebSocket):
 # Health check
 # ---------------------------------------------------------------------------
 
+@app.get("/api/skills")
+def list_skills():
+    """Return all 8 fixed skills from the registry."""
+    return all_skills()
+
+
+@app.get("/api/skills/{skill_id}")
+def get_skill_by_id(skill_id: str):
+    skill = get_skill(skill_id)
+    if not skill:
+        raise HTTPException(status_code=404, detail=f"Skill '{skill_id}' not found")
+    return skill
+
+
+@app.get("/api/demo/status")
+def demo_status():
+    """Demo mode configuration – useful for frontend to adapt UI."""
+    return {
+        "demo_mode": DEMO_MODE,
+        "ai_mode": AI_MODE,
+        "ai_using_real": ai.using_real_ai,
+        "device_connected": device_bridge.state.connection == "connected",
+        "skill_count": 8,
+    }
+
+
 @app.get("/health")
 def health():
     return {
         "status": "ok",
+        "demo_mode": DEMO_MODE,
         "ai_mode": "claude" if ai.using_real_ai else "mock",
         "device_connected": device_bridge.state.connection == "connected",
     }

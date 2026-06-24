@@ -6,7 +6,8 @@ import { LoadingSpinner } from "../components/LoadingStates";
 import { OtterIllustration } from "../components/OtterIllustration";
 import { aiService as aiAgentService } from "../services/aiService";
 import { recordService as recordRepository } from "../services/recordService";
-import { deviceSimulator } from "../services/deviceSimulator";
+import { deviceAdapter } from "../services/deviceAdapter";
+import { getSkill } from "../data/skillRegistry";
 
 const fallbackAction: SuggestedAction = {
   id: "action_breathe_default",
@@ -16,8 +17,23 @@ const fallbackAction: SuggestedAction = {
   estimatedMinutes: 1,
   pressureLevel: "very-low",
   primaryCta: "start",
-  alternatives: ["skip", "change", "later"]
+  alternatives: ["skip", "change", "later"],
+  skillId: "breathing_60s",
 };
+
+function skillToCalmScript(action: SuggestedAction): CalmScript | null {
+  const skill = action.skillId ? getSkill(action.skillId) : null;
+  if (!skill || skill.type !== "calm") return null;
+  return {
+    id: `skill_${skill.skill_id}`,
+    actionId: action.id,
+    title: skill.title_zh,
+    durationSeconds: skill.duration_seconds,
+    tone: "quiet",
+    prompts: skill.steps.map((s) => ({ id: s.step_id, text: s.instruction_zh, seconds: s.duration_seconds })),
+    safetyDisclaimer: skill.safety_note_zh,
+  };
+}
 
 export function BreathePage({ activeAction }: { activeAction: SuggestedAction | null }) {
   const action = activeAction?.type === "breathe" ? activeAction : fallbackAction;
@@ -27,24 +43,38 @@ export function BreathePage({ activeAction }: { activeAction: SuggestedAction | 
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setScript(null); // Set to null first to trigger loading spinner
-    aiAgentService.createCalmScript(action).then(setScript);
+    setScript(null);
     setCompletion(null);
     setSaved(false);
+    setStep(0);
+
+    // Use skill registry first (guaranteed stable); fall back to AI
+    const fromRegistry = skillToCalmScript(action);
+    if (fromRegistry) {
+      setScript(fromRegistry);
+    } else {
+      aiAgentService.createCalmScript(action).then(setScript);
+    }
   }, [action]);
 
   const goToStep = (next: number) => {
     setStep(next);
     if (script) {
-      deviceSimulator.sendCommand({
-        type: "SHOW_STEP",
-        payload: { text: script.prompts[next]?.text ?? "", stepNum: next + 1, totalSteps: script.prompts.length, mode: "breathe" }
+      const skill = action.skillId ? getSkill(action.skillId) : null;
+      const screenState = (skill?.steps[next]?.screen_state ?? "breathing") as "breathing";
+      deviceAdapter.showStep({
+        state: screenState,
+        text: script.prompts[next]?.text ?? "",
+        stepNum: next + 1,
+        totalSteps: script.prompts.length,
+        durationSeconds: script.prompts[next]?.seconds ?? 15,
+        mode: "breathe",
       });
     }
   };
 
   const complete = async () => {
-    deviceSimulator.sendCommand({ type: "SHOW_COMPLETE", payload: { message: "呼吸完成，做得很好！" } });
+    deviceAdapter.showComplete("呼吸完成，做得很好！");
     setCompletion(await aiAgentService.completeAction(action));
     setSaved(false);
   };
@@ -76,18 +106,11 @@ export function BreathePage({ activeAction }: { activeAction: SuggestedAction | 
             <div className="absolute inset-3 rounded-full bg-[#c6dde5]" />
             <div
               className="absolute inset-2 rounded-full opacity-90"
-              style={{
-                background: `conic-gradient(#4b7a5a ${progress}%, rgba(255,255,255,0.72) ${progress}% 100%)`
-              }}
+              style={{ background: `conic-gradient(#4b7a5a ${progress}%, rgba(255,255,255,0.72) ${progress}% 100%)` }}
             />
             <div className="absolute inset-8 rounded-full bg-[#d6e8e5]" />
             <div className="absolute inset-10 rounded-full border-[10px] border-white/75" />
-            <OtterIllustration
-              variant="breathing"
-              size="card"
-              alt="小水獭呼吸引导"
-              className="relative z-[1] scale-[1.55]"
-            />
+            <OtterIllustration variant="breathing" size="card" alt="小水獭呼吸引导" className="relative z-[1] scale-[1.55]" />
           </div>
 
           <div className="mt-5">
@@ -131,7 +154,7 @@ export function BreathePage({ activeAction }: { activeAction: SuggestedAction | 
           </p>
         </section>
       )}
-      
+
       {completion && (
         <SaveRecordPrompt
           completion={completion}
