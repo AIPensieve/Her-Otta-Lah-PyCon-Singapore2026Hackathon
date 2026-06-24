@@ -24,6 +24,11 @@
 - [x] Add standalone watchface UI page from generated reference states.
 - [x] Add SET_WATCHFACE command contract and simulator integration.
 - [x] Wire Talk and Move flow events to SET_WATCHFACE commands.
+- [x] Align frontend AI adapter and local backend with new `/ai/*` contract.
+- [x] Add Skill Registry aliases for newer AI/RAG skill IDs.
+- [x] Update AI API contract docs for Cloud/AI handoff.
+- [x] Apply AI/RAG team confirmations for weekly summary, memory endpoints, hardware directive, and game flows.
+- [x] Add game flow contract fields for motion detection, scoring, completion, and sensor events.
 
 ## Nice To Have
 
@@ -55,6 +60,14 @@
 - [ ] Test on real hardware – verify AMOLED library include path.
 - [ ] Verify Chinese font rendering on device.
 - [ ] Touch input to confirm/skip on device (future).
+
+## AI / RAG Follow-Up
+
+- [x] Confirm `/ai/generate-weekly-summary` response shape with AI/RAG team.
+- [x] Confirm `/ai/memory/*` request/response shapes with AI/RAG team.
+- [x] Confirm final `hardware_directive.round_screen_state` values for real device firmware.
+- [x] Decide whether game-like skill IDs remain aliases or become first-class skills.
+- [x] Confirm whether future game flows need extra fields beyond `game_id`, `skill_id`, and `hardware_directive.open_fixed_flow`.
 
 ## Future / Post-Demo
 

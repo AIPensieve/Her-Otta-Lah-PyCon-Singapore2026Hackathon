@@ -11,27 +11,74 @@ export type UserInput = {
 
 export type SuggestedActionType = "breathe" | "move" | "record" | "talk";
 
+export type GameMotionDetection = {
+  primaryMotion: string;
+  fallbackInput: string;
+  sensorSignal: string;
+  minimumReps: number;
+  maxRepsTarget: number;
+  safetyStopSignals: string[];
+};
+
+export type GameScoring = {
+  scoreUnit: string;
+  pointsPerMotion: number;
+  targetScore: number;
+  minimumSuccessScore: number;
+  pressureLevel: "very-low" | "low" | "medium";
+};
+
+export type GameCompletion = {
+  durationSeconds: number;
+  successCondition: string;
+  recordActionOnFinish: boolean;
+  completionStates: Array<"completed" | "skipped" | "changed" | "later" | "safety_stopped">;
+};
+
+export type GameSensorEvents = {
+  expectedFromHardware: string[];
+  optionalSignals: string[];
+  appToHardware: string[];
+};
+
 export type SuggestedAction = {
   id: string;
   type: SuggestedActionType;
+  /** Raw backend action_type, e.g. calm / move / none. */
+  apiActionType?: "calm" | "move" | "none";
   title: string;
   reason: string;
   estimatedMinutes: number;
+  /** Seconds from the AI/RAG contract. Kept for hardware countdown precision. */
+  durationSeconds?: number;
   pressureLevel: "very-low" | "low" | "medium";
   primaryCta: "start";
   alternatives: Array<"skip" | "change" | "later">;
+  userOptions?: Array<"start" | "skip" | "change" | "later">;
   skillId?: string;   // links to SkillRegistry key
+  gameId?: string;
+  movement?: string;
+  motionDetection?: GameMotionDetection;
+  scoring?: GameScoring;
+  completion?: GameCompletion;
+  sensorEvents?: GameSensorEvents;
 };
 
 export type AIUnderstandResponse = {
   id: string;
   inputId: string;
+  /** Raw text echoed by the AI/RAG service. */
+  userText?: string;
+  /** API language label before mapping, e.g. zh / en / zh_en_mixed. */
+  apiLanguage?: string;
   detectedState?: {
     mood?: "tired" | "anxious" | "sad" | "irritated" | "calm" | "unclear";
     bodySignals: string[];
     riskLevel: "normal" | "needs-human-help";
     language: LocaleCode;
   };
+  bodyState?: string[];
+  moodState?: string[];
   reply: string;
   /** Short voice line for the otter companion (from pet_voice_text in API contract) */
   petVoiceText?: string;
@@ -43,6 +90,7 @@ export type AIUnderstandResponse = {
   safetyLevel?: string;
   /** Whether the backend suggests creating a record from this turn */
   wantsRecord?: boolean;
+  recordSuggestion?: boolean;
   createdAt?: string;
 };
 

@@ -43,6 +43,7 @@ Sent on connect and after each command is handled.
 | `location_confirm` | User-initiated location send confirmation |
 | `location_sent` | Location sent confirmation |
 | `low_battery` | Low battery screen |
+| `playful_timer` | Game flow timer / score screen from AI game contract |
 
 ### lightMode values
 
@@ -143,8 +144,49 @@ Preferred command for the production AMOLED watchface UI. The web app sends this
 | `send-location` | Send location confirmation |
 | `location-sent` | Location sent |
 | `connection` | Wi-Fi / Bluetooth / battery status |
+| `heel_drop_game_60s` | Heel-drop game flow |
+| `neck_relax_game_60s` | Neck-relax game flow |
 
 For safety, `send-location` and `location-sent` must only be triggered after an explicit user action. They must not be used for covert or continuous location tracking.
+
+## AI Game Flow Directive
+
+When AI returns a game flow, the app and hardware split responsibilities:
+
+- App uses `game_id`, `scoring`, `completion`, `hardware_directive.open_fixed_flow`, and `hardware_directive.watchface`.
+- ESP32 uses `hardware_directive.round_screen_state`, `display_text`, `voice_text`, `countdown_seconds`, `sensor_events`, and `motion_detection.sensor_signal`.
+
+Example hardware directive:
+
+```json
+{
+  "skill_id": "heel_drop_game_60s",
+  "open_fixed_flow": "heel_drop_game_60s",
+  "round_screen_state": "playful_timer",
+  "watchface": "heel_drop_game_60s",
+  "display_text": "小水獭接红豆冰",
+  "voice_text": "Small-small movement can already. Press when you finish one.",
+  "countdown_seconds": 60,
+  "effects": {
+    "light": "playful_soft",
+    "breathing_light": false,
+    "vibration": "score_soft"
+  }
+}
+```
+
+Example ESP32 event back to backend:
+
+```json
+{
+  "event": "motion_detected",
+  "game_id": "heel_drop_game_60s",
+  "signal": "imu_vertical_pulse",
+  "timestamp": 123456
+}
+```
+
+The ESP32 does not run AI or Pygame. It renders the watchface, runs the countdown, and reports IMU/button/touch events.
 
 ## TypeScript Types
 

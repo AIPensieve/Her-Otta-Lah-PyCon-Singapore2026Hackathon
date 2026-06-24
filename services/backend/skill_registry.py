@@ -353,9 +353,98 @@ SKILLS: dict[str, dict] = {
     },
 }
 
+SKILLS["heel_drop_game_60s"] = {
+    **SKILLS["gentle_stretch_5min"],
+    "skill_id": "heel_drop_game_60s",
+    "type": "move",
+    "title_zh": "60 秒踮脚小游戏",
+    "title_en": "60-Second Heel Drop Game",
+    "description_zh": "用很轻的踮脚节奏做一个短小游戏，随时可以停下。",
+    "description_en": "A very short heel-drop game flow. Stop anytime.",
+    "duration_seconds": 60,
+    "intensity": "very_low",
+    "tags": ["game", "heel_drop", "gentle", "move"],
+    "steps": [
+        {"step_id": "hd1", "name_zh": "扶稳", "name_en": "Hold Support",
+         "duration_seconds": 15,
+         "instruction_zh": "扶好椅背或桌边，脚跟轻轻抬起。",
+         "instruction_en": "Hold a chair or table, gently lift your heels.",
+         "device_text_zh": "扶稳再开始", "device_text_en": "Hold steady", "screen_state": "exercise_countdown"},
+        {"step_id": "hd2", "name_zh": "轻落", "name_en": "Drop Gently",
+         "duration_seconds": 30,
+         "instruction_zh": "脚跟轻轻落下，不要用力震动身体。",
+         "instruction_en": "Let your heels drop gently. Do not jar your body.",
+         "device_text_zh": "轻轻落下", "device_text_en": "Drop softly", "screen_state": "exercise_countdown"},
+        {"step_id": "hd3", "name_zh": "停下", "name_en": "Rest",
+         "duration_seconds": 15,
+         "instruction_zh": "停下来，感受一下小腿和呼吸。",
+         "instruction_en": "Stop and notice your calves and breath.",
+         "device_text_zh": "完成了", "device_text_en": "Done", "screen_state": "next_move"},
+    ],
+    "completion_record_template": {
+        "kind": "action", "title": "60 秒踮脚小游戏",
+        "summary": "完成了 60 秒轻量踮脚小游戏。",
+        "tags": ["game", "heel_drop", "move"],
+        "mood_tags": [], "body_tags": [], "related_action": "60 秒踮脚小游戏",
+    },
+}
+
+SKILLS["neck_relax_game_60s"] = {
+    **SKILLS["neck_relax_3min"],
+    "skill_id": "neck_relax_game_60s",
+    "type": "move",
+    "title_zh": "60 秒肩颈小游戏",
+    "title_en": "60-Second Neck Relax Game",
+    "description_zh": "用短小游戏方式做肩颈放松，轻柔、不追求幅度。",
+    "description_en": "A short game-like neck and shoulder relaxation flow.",
+    "duration_seconds": 60,
+    "intensity": "very_low",
+    "tags": ["game", "neck", "shoulder", "move"],
+    "steps": [
+        {"step_id": "ng1", "name_zh": "转肩", "name_en": "Shoulder Roll",
+         "duration_seconds": 20,
+         "instruction_zh": "肩膀慢慢向后转两圈，动作小一点也可以。",
+         "instruction_en": "Slowly roll shoulders backward twice. Small movement is fine.",
+         "device_text_zh": "慢慢转肩", "device_text_en": "Roll shoulders", "screen_state": "exercise_countdown"},
+        {"step_id": "ng2", "name_zh": "看远", "name_en": "Look Far",
+         "duration_seconds": 20,
+         "instruction_zh": "轻轻抬头看远处，让脖子放松。",
+         "instruction_en": "Gently look into the distance and relax your neck.",
+         "device_text_zh": "看向远处", "device_text_en": "Look far", "screen_state": "exercise_countdown"},
+        {"step_id": "ng3", "name_zh": "放松", "name_en": "Rest",
+         "duration_seconds": 20,
+         "instruction_zh": "停下来，感受肩颈有没有松一点。",
+         "instruction_en": "Stop and notice if your neck feels a little looser.",
+         "device_text_zh": "完成了", "device_text_en": "Done", "screen_state": "next_move"},
+    ],
+    "completion_record_template": {
+        "kind": "action", "title": "60 秒肩颈小游戏",
+        "summary": "完成了 60 秒肩颈放松小游戏。",
+        "tags": ["game", "neck", "shoulder", "move"],
+        "mood_tags": [], "body_tags": ["肩颈"], "related_action": "60 秒肩颈小游戏",
+    },
+}
+
+SKILL_ALIASES: dict[str, str] = {
+    # IDs from the newer AI/RAG contract. Keep canonical demo IDs stable.
+    "night_low_light_companion": "night_calm",
+    "hot_flash_calm_90s": "hot_flash_calm",
+    "knee_friendly_5min": "knee_friendly_move",
+    "bedtime_stretch_5min": "sleep_stretch",
+    "gentle_stretch_3min": "gentle_stretch_5min",
+    "talk_and_sort_3min": "emotion_overload",
+}
+
+
+def normalize_skill_id(skill_id: str | None) -> str | None:
+    if not skill_id:
+        return None
+    return SKILL_ALIASES.get(skill_id, skill_id)
+
 
 def get_skill(skill_id: str) -> dict | None:
-    return SKILLS.get(skill_id)
+    normalized = normalize_skill_id(skill_id)
+    return SKILLS.get(normalized) if normalized else None
 
 
 def all_skills() -> list[dict]:
