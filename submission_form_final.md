@@ -4,7 +4,7 @@ Use this as a polished source for the PyCon SG hackathon submission form. Keep c
 
 ## Project Title
 
-Her Otta Lah / nearu: Singapore Otter Auntie Menopause Companion
+Her Otta Lah / Singapore Otter Menopause AI Companion
 
 ## Track
 
