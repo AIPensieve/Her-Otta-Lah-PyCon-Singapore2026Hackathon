@@ -7,3 +7,12 @@ dist/
 npm-debug.log*
 coverage/
 *.tsbuildinfo
+
+# Hardware credentials
+hardware/esp32-otter/config.h
+
+# Python backend
+services/backend/.venv/
+services/backend/__pycache__/
+services/backend/*.pyc
+services/backend/otter_records.db

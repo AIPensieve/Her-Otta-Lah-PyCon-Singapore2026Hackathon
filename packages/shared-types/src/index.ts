@@ -119,4 +119,21 @@ export type DeviceCommand =
   | {
       type: "PLAY_SHORT_REPLY";
       payload: { text: string; locale: LocaleCode };
+    }
+  | {
+      type: "SHOW_STEP";
+      payload: {
+        text: string;
+        stepNum: number;
+        totalSteps: number;
+        mode: "breathe" | "move";
+      };
+    }
+  | {
+      type: "SHOW_COMPLETE";
+      payload: { message: string };
+    }
+  | {
+      type: "VIBRATE";
+      payload: { pattern: "short" | "long" | "double" };
     };

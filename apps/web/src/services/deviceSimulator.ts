@@ -1,5 +1,7 @@
 import type { DeviceCommand, DeviceState } from "@ai-otter/shared-types";
 
+export type DeviceSimulatorListener = (state: DeviceState) => void;
+
 export class DeviceSimulator {
   private state: DeviceState = {
     deviceId: "otter-sim-001",
@@ -11,8 +13,21 @@ export class DeviceSimulator {
     lastSeenAt: new Date().toISOString()
   };
 
+  private listeners = new Set<DeviceSimulatorListener>();
+
   getState(): DeviceState {
     return this.state;
+  }
+
+  subscribe(listener: DeviceSimulatorListener): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  private notify() {
+    for (const listener of this.listeners) {
+      listener(this.state);
+    }
   }
 
   sendCommand(command: DeviceCommand): DeviceState {
@@ -30,8 +45,13 @@ export class DeviceSimulator {
 
     if (command.type === "PLAY_SHORT_REPLY") {
       this.state = { ...this.state, screenState: "listening", lastSeenAt: new Date().toISOString() };
+      // Simulate going back to idle after a short delay
+      setTimeout(() => {
+        this.sendCommand({ type: "SET_SCREEN_STATE", payload: { screenState: "idle" } });
+      }, 2000);
     }
 
+    this.notify();
     return this.state;
   }
 }

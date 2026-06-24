@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { PageShell, Panel } from "@ai-otter/ui";
+import { PageShell, Panel, Button } from "@ai-otter/ui";
 import { deviceSimulator } from "../services/deviceSimulator";
+import { DeviceHardwareUI } from "../components/DeviceHardwareUI";
 
 export function MePage() {
   const device = deviceSimulator.getState();
   const [gpsEnabled, setGpsEnabled] = useState(false);
+  const [showSimulator, setShowSimulator] = useState(false);
 
   return (
     <PageShell title="我的">
@@ -14,7 +16,12 @@ export function MePage() {
           <p className="mt-2 text-slate-600">当前是 Hackathon 公开 Web/PWA Demo，使用 mock AI 和设备模拟器。</p>
         </Panel>
         <Panel>
-          <p className="text-lg font-bold text-slate-900">桌宠模拟器</p>
+          <div className="flex items-center justify-between">
+            <p className="text-lg font-bold text-slate-900">桌宠模拟器</p>
+            <Button onClick={() => setShowSimulator(true)} tone="secondary" className="text-xs px-3 py-1.5 h-auto">
+              打开设备画面
+            </Button>
+          </div>
           <dl className="mt-4 grid grid-cols-2 gap-4 text-sm">
             <div>
               <dt className="text-slate-500 mb-1">连接</dt>
@@ -56,6 +63,8 @@ export function MePage() {
           </div>
         </Panel>
       </div>
+
+      {showSimulator && <DeviceHardwareUI onClose={() => setShowSimulator(false)} />}
     </PageShell>
   );
 }

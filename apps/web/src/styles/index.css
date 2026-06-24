@@ -4,18 +4,700 @@
 
 :root {
   color-scheme: light;
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  background: #e7e5e4;
+  font-family: 'PingFang SC', 'Hiragino Sans GB', Inter, ui-sans-serif, system-ui, sans-serif;
+  background: #f0ebe0;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: #e7e5e4;
+  background: #f0ebe0;
 }
 
 button,
 a,
 textarea {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* ==============================
+   GLOBAL
+   ============================== */
+
+* { box-sizing: border-box; }
+
+/* ==============================
+   TALK PAGE  (tp-)
+   ============================== */
+
+.tp-page {
+  min-height: 100svh;
+  background: #f5efe4;
+  display: flex;
+  flex-direction: column;
+  max-width: 390px;
+  margin: 0 auto;
+  padding-bottom: 76px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Status bar */
+.tp-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 0;
+}
+.tp-statusbar-time {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.tp-statusbar-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tp-battery {
+  width: 22px;
+  height: 11px;
+  border: 1.5px solid #1a1a1a;
+  border-radius: 2px;
+  position: relative;
+  padding: 1.5px;
+}
+.tp-battery::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 5px;
+  background: #1a1a1a;
+  border-radius: 0 1px 1px 0;
+}
+.tp-battery-inner {
+  height: 100%;
+  background: #1a1a1a;
+  border-radius: 1px;
+}
+
+/* Header */
+.tp-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px 20px 0;
+}
+.tp-greeting {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.35;
+  margin: 0 0 8px;
+}
+.tp-connected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: #3a5c3a;
+}
+.tp-connected-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #52a063;
+}
+.tp-lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.8);
+  border: 1px solid #d5cdc0;
+  border-radius: 20px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #3a5c3a;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tp-lang-icon {
+  font-size: 13px;
+}
+
+/* Otter illustration area */
+.tp-otter-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin: 8px auto 0;
+  width: 220px;
+  height: 200px;
+}
+
+/* Sprite sheet positioning for each otter state
+   Source: /assets/otter-appui.png  1536 × 1024
+   Grid: 4 cols × 3 rows → each cell ≈ 384 × 341 px
+
+   Default (row1 col1): offset 0,0
+   Listening (row1 col2): offset 0, 384
+   Thinking (row1 col3): offset 0, 768
+   Breathing (row1 col4): offset 0, 1152
+*/
+.tp-otter-sprite {
+  background-image: url('/assets/otter-appui.png');
+  background-size: 768px 512px; /* 50% scale of 1536×1024 */
+  background-repeat: no-repeat;
+  width: 192px;
+  height: 170px;
+}
+.tp-otter-default {
+  background-position: 0px 0px;
+}
+.tp-otter-listening {
+  background-position: -192px 0px;
+}
+.tp-otter-thinking {
+  background-position: -384px 0px;
+}
+.tp-otter-breathing {
+  background-position: -576px 0px;
+}
+.tp-otter-sm {
+  width: 96px;
+  height: 85px;
+  background-size: 384px 256px;
+}
+.tp-otter-sm.tp-otter-default { background-position: 0px 0px; }
+
+.tp-otter-pulse {
+  animation: tp-pulse 1.8s ease-in-out infinite;
+}
+@keyframes tp-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(0.96); }
+}
+
+.tp-heart {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-10px);
+  font-size: 18px;
+}
+
+/* Prompt text */
+.tp-prompt {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 12px 20px 4px;
+}
+.tp-subprompt {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 400;
+  color: #7a7060;
+  margin: 0 20px 16px;
+  line-height: 1.5;
+}
+
+/* Hold to Talk button */
+.tp-hold-wrap {
+  padding: 0 20px 14px;
+}
+.tp-hold-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 15px 20px;
+  background: #3a6b4a;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 19px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  transition: filter 0.15s;
+}
+.tp-hold-btn:active { filter: brightness(0.9); }
+.tp-mic {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+/* Shortcut chips */
+.tp-chips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 20px 10px;
+}
+.tp-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.75);
+  border: 1px solid #d5cdc0;
+  border-radius: 12px;
+  padding: 13px 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2c2416;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s;
+}
+.tp-chip:active { background: #ece5d8; }
+.tp-chip-icon { font-size: 15px; }
+
+/* Footer note */
+.tp-footer-note {
+  text-align: center;
+  font-size: 12px;
+  color: #b0a898;
+  margin: 4px 0 0;
+}
+
+/* Loading state */
+.tp-loading {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+.tp-loading-text {
+  font-size: 16px;
+  color: #7a7060;
+  font-weight: 500;
+}
+
+/* Result state */
+.tp-result-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 20px 20px;
+  gap: 12px;
+}
+.tp-bubble {
+  width: 100%;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid #d5cdc0;
+  border-radius: 18px;
+  padding: 16px 18px;
+}
+.tp-bubble-text {
+  font-size: 15px;
+  color: #2c2416;
+  line-height: 1.6;
+  margin: 0;
+}
+.tp-action-card {
+  width: 100%;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid #d5cdc0;
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tp-action-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+.tp-action-reason {
+  font-size: 13px;
+  color: #7a7060;
+  line-height: 1.5;
+  margin: 0 0 4px;
+}
+.tp-btn-start {
+  width: 100%;
+  padding: 13px;
+  background: #3a6b4a;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tp-btn-row {
+  display: flex;
+  gap: 8px;
+}
+.tp-btn-sec {
+  flex: 1;
+  padding: 10px;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid #d5cdc0;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #5a5040;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tp-disclaimer {
+  font-size: 11px;
+  color: #b0a898;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ==============================
+   BOTTOM NAV  (shared)
+   ============================== */
+
+/* existing bottom nav styles from @ai-otter/ui are kept */
+
+@keyframes breathe-anim {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.15); opacity: 0.7; }
+}
+
+
+.talk-page {
+  min-height: 100svh;
+  background: #f5f0e6;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 80px;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.talk-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px 0;
+  font-size: 12px;
+  color: #6b6453;
+  font-weight: 600;
+}
+
+.talk-status-icons {
+  display: flex;
+  gap: 6px;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.talk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 20px 0;
+}
+
+.talk-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.talk-greeting {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2c2416;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.talk-sun {
+  font-size: 20px;
+}
+
+.talk-device-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid #d4ccbb;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4a6741;
+}
+
+.talk-device-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4a9e5c;
+  box-shadow: 0 0 0 2px rgba(74, 158, 92, 0.3);
+}
+
+.talk-lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid #d4ccbb;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a6741;
+  cursor: pointer;
+}
+
+.talk-lang-divider {
+  opacity: 0.4;
+  margin: 0 1px;
+}
+
+/* Otter illustration */
+.talk-otter-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 40px 0;
+  min-height: 200px;
+}
+
+.talk-otter-img {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Prompt text */
+.talk-prompt {
+  text-align: center;
+  font-size: 17px;
+  font-weight: 500;
+  color: #4a3f2f;
+  margin: 12px 20px 20px;
+}
+
+/* Hold to Talk button */
+.talk-btn-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 0 20px 16px;
+}
+
+.talk-hold-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  padding: 16px 24px;
+  background: #3a6b4a;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 20px rgba(58, 107, 74, 0.35);
+  transition: all 0.15s ease;
+}
+
+.talk-hold-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 10px rgba(58, 107, 74, 0.25);
+}
+
+.talk-mic-icon {
+  width: 22px;
+  height: 22px;
+  stroke: white;
+}
+
+/* Shortcut Chips */
+.talk-chips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 20px 20px;
+}
+
+.talk-chip {
+  background: rgba(255,255,255,0.85);
+  border: 1px solid #ddd6c8;
+  border-radius: 14px;
+  padding: 14px 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #3a3026;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.talk-chip:active {
+  background: #eee8da;
+}
+
+/* Loading state */
+.talk-loading {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px;
+}
+
+.talk-loading-otter {
+  width: 120px;
+  height: 120px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.talk-loading-otter img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.95); }
+}
+
+.talk-loading-text {
+  font-size: 16px;
+  color: #6b5e4a;
+  font-weight: 500;
+}
+
+/* Result state */
+.talk-result {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px 20px;
+  gap: 14px;
+}
+
+.talk-result-otter {
+  width: 100px;
+  height: 100px;
+  margin: 16px auto 0;
+}
+
+.talk-result-otter img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.talk-result-bubble {
+  background: rgba(255,255,255,0.9);
+  border: 1px solid #ddd6c8;
+  border-radius: 20px;
+  padding: 16px 20px;
+}
+
+.talk-result-reply {
+  font-size: 16px;
+  color: #3a3026;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.talk-result-action-card {
+  background: rgba(255,255,255,0.9);
+  border: 1px solid #ddd6c8;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.talk-result-action-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2c2416;
+  margin: 0;
+}
+
+.talk-result-action-reason {
+  font-size: 14px;
+  color: #7a6e5e;
+  line-height: 1.5;
+  margin: 0 0 8px;
+}
+
+.talk-result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.talk-result-btn-start {
+  width: 100%;
+  padding: 14px;
+  background: #3a6b4a;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.talk-result-secondary {
+  display: flex;
+  gap: 8px;
+}
+
+.talk-result-btn-secondary {
+  flex: 1;
+  padding: 10px;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid #ddd6c8;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #5a5040;
+  cursor: pointer;
+}
+
+.talk-result-disclaimer {
+  font-size: 11px;
+  color: #a09080;
+  text-align: center;
+  line-height: 1.5;
+  padding: 0 10px;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.15); opacity: 0.7; }
 }
