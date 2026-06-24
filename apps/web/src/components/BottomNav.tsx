@@ -1,4 +1,7 @@
-import { routes, type AppRoute } from "../app/routes";
+import { type AppRoute } from "../app/routes";
+import { useT } from "../locales";
+
+const NAV_IDS: Exclude<AppRoute, "watchfaces">[] = ["talk", "breathe", "move", "timeline", "me"];
 
 function NavIcon({ id }: { id: AppRoute }) {
   const common = "h-5 w-5";
@@ -49,22 +52,40 @@ function NavIcon({ id }: { id: AppRoute }) {
 }
 
 export function BottomNav({ activeRoute }: { activeRoute: AppRoute }) {
+  const t = useT();
+
+  const navLabels: Record<Exclude<AppRoute, "watchfaces">, string> = {
+    talk: t.nav.talk,
+    breathe: t.nav.breathe,
+    move: t.nav.move,
+    timeline: t.nav.timeline,
+    me: t.nav.me,
+  };
+
+  const navPaths: Record<Exclude<AppRoute, "watchfaces">, string> = {
+    talk: "#/talk",
+    breathe: "#/breathe",
+    move: "#/move",
+    timeline: "#/timeline",
+    me: "#/me",
+  };
+
   return (
     <nav className="fixed inset-x-0 bottom-0 z-10 px-4 pb-4">
       <div className="mx-auto grid max-w-[390px] grid-cols-5 gap-1 rounded-[24px] border border-[#eadfce] bg-[#fffdf7] px-2 pb-2 pt-2 shadow-[0_-8px_28px_rgba(56,43,24,0.10)]">
-        {routes.map((route) => (
+        {NAV_IDS.map((id) => (
           <a
-            key={route.id}
-            href={route.path}
-            aria-current={activeRoute === route.id ? "page" : undefined}
+            key={id}
+            href={navPaths[id]}
+            aria-current={activeRoute === id ? "page" : undefined}
             className={`flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-[20px] px-1 text-center text-[11px] font-semibold leading-none transition ${
-              activeRoute === route.id
+              activeRoute === id
                 ? "bg-[#5f875e] text-white shadow-[0_8px_18px_rgba(95,135,94,0.26)]"
                 : "text-[#777a71] active:bg-[#f0eadf]"
             }`}
           >
-            <NavIcon id={route.id} />
-            <span>{route.label}</span>
+            <NavIcon id={id} />
+            <span>{navLabels[id]}</span>
           </a>
         ))}
       </div>

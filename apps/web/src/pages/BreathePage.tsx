@@ -1,21 +1,10 @@
-import { useState } from "react";
 import type { SuggestedAction } from "@ai-otter/shared-types";
-
-// Helper component to extract otter graphics directly from the full screenshot
-const SpriteOtter = ({ x, y, w = 70, h = 70 }: { x: number; y: number; w?: number; h?: number }) => (
-  <div
-    style={{
-      width: w,
-      height: h,
-      backgroundImage: `url('/assets/breathe-ui.png')`,
-      backgroundSize: `390px auto`,
-      backgroundPosition: `-${x}px -${y}px`,
-      backgroundRepeat: "no-repeat",
-    }}
-  />
-);
+import { useT } from "../locales";
 
 export function BreathePage({ activeAction }: { activeAction?: SuggestedAction | null }) {
+  const t = useT();
+  const b = t.breathe;
+
   return (
     <div className="bp-page">
       {/* ── Status bar (Mocked to match screenshot) ── */}
@@ -45,8 +34,8 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
           </svg>
         </button>
         <div className="bp-header-title">
-          <h1>缓一缓</h1>
-          <p>给自己一点空间，慢慢来</p>
+          <h1>{b.title}</h1>
+          <p>{b.subtitle}</p>
         </div>
         <div className="bp-header-otter">
           <img src="/assets/otter-breathe-header.png" alt="Meditating Otter" />
@@ -55,42 +44,42 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
 
       {/* ── Content Sections ── */}
       <div className="bp-content">
-        
+
         {/* Section A */}
         <div className="bp-section">
           <div className="bp-sec-header">
-            <div className="bp-sec-letter bp-color-a">A</div>
+            <div className="bp-sec-letter bp-color-a">{b.secA_letter}</div>
             <div className="bp-sec-title">
-              <h2>每天一点点</h2>
-              <p>日常练习，积累好状态</p>
+              <h2>{b.secA_title}</h2>
+              <p>{b.secA_desc}</p>
             </div>
           </div>
           <div className="bp-cards">
             <div className="bp-card bp-card-a">
               <div className="bp-card-info">
-                <h3>1 分钟呼吸</h3>
-                <p>一分钟，回到平静</p>
-                <div className="bp-card-time"><span className="bp-icon-clock" /> 1 分钟</div>
+                <h3>{b.a1_title}</h3>
+                <p>{b.a1_desc}</p>
+                <div className="bp-card-time"><span className="bp-icon-clock" /> {b.a1_time}</div>
               </div>
-              <div className="bp-card-otter"><SpriteOtter x={60} y={230} /></div>
+              <div className="bp-card-otter"><img src="/assets/breathe-otters/a1.png" alt="otter" /></div>
               <div className="bp-card-arrow" />
             </div>
             <div className="bp-card bp-card-a">
               <div className="bp-card-info">
-                <h3>睡前放松 <span className="bp-icon-moon">🌙</span></h3>
-                <p>放松身心，好好睡一觉</p>
-                <div className="bp-card-time"><span className="bp-icon-clock" /> 5 分钟</div>
+                <h3>{b.a2_title} <span className="bp-icon-moon">🌙</span></h3>
+                <p>{b.a2_desc}</p>
+                <div className="bp-card-time"><span className="bp-icon-clock" /> {b.a2_time}</div>
               </div>
-              <div className="bp-card-otter"><SpriteOtter x={180} y={240} w={80} /></div>
+              <div className="bp-card-otter"><img src="/assets/breathe-otters/a2.png" alt="otter" /></div>
               <div className="bp-card-arrow" />
             </div>
             <div className="bp-card bp-card-a">
               <div className="bp-card-info">
-                <h3>午后恢复</h3>
-                <p>提提神，轻松一下</p>
-                <div className="bp-card-time"><span className="bp-icon-clock" /> 3 分钟</div>
+                <h3>{b.a3_title}</h3>
+                <p>{b.a3_desc}</p>
+                <div className="bp-card-time"><span className="bp-icon-clock" /> {b.a3_time}</div>
               </div>
-              <div className="bp-card-otter"><SpriteOtter x={310} y={220} /></div>
+              <div className="bp-card-otter"><img src="/assets/breathe-otters/a3.png" alt="otter" /></div>
               <div className="bp-card-arrow" />
             </div>
           </div>
@@ -99,38 +88,38 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
         {/* Section B */}
         <div className="bp-section">
           <div className="bp-sec-header">
-            <div className="bp-sec-letter bp-color-b">B</div>
+            <div className="bp-sec-letter bp-color-b">{b.secB_letter}</div>
             <div className="bp-sec-title">
-              <h2>现在有点难受</h2>
-              <p>情绪来了，我们陪你</p>
+              <h2>{b.secB_title}</h2>
+              <p>{b.secB_desc}</p>
             </div>
           </div>
           <div className="bp-cards">
             <div className="bp-card bp-card-b">
               <div className="bp-card-info">
-                <h3>突然烦躁</h3>
-                <p>先不分析，陪你呼吸 60 秒</p>
-                <div className="bp-card-time bp-time-red"><span className="bp-icon-clock" /> 1 分钟</div>
+                <h3>{b.b1_title}</h3>
+                <p>{b.b1_desc}</p>
+                <div className="bp-card-time bp-time-red"><span className="bp-icon-clock" /> {b.b1_time}</div>
               </div>
-              <div className="bp-card-otter"><SpriteOtter x={60} y={400} /></div>
+              <div className="bp-card-otter"><img src="/assets/breathe-otters/b1.png" alt="otter" /></div>
               <div className="bp-card-arrow bp-arrow-red" />
             </div>
             <div className="bp-card bp-card-b">
               <div className="bp-card-info">
-                <h3>想哭一下</h3>
-                <p>可以哭出来，会好一点</p>
-                <div className="bp-card-time bp-time-red"><span className="bp-icon-clock" /> 3 分钟</div>
+                <h3>{b.b2_title}</h3>
+                <p>{b.b2_desc}</p>
+                <div className="bp-card-time bp-time-red"><span className="bp-icon-clock" /> {b.b2_time}</div>
               </div>
-              <div className="bp-card-otter"><SpriteOtter x={180} y={400} /></div>
+              <div className="bp-card-otter"><img src="/assets/breathe-otters/b2.png" alt="otter" /></div>
               <div className="bp-card-arrow bp-arrow-red" />
             </div>
             <div className="bp-card bp-card-b">
               <div className="bp-card-info">
-                <h3>心里堵住了</h3>
-                <p>一起把心里的话说出来</p>
-                <div className="bp-card-time bp-time-red"><span className="bp-icon-clock" /> 5 分钟</div>
+                <h3>{b.b3_title}</h3>
+                <p>{b.b3_desc}</p>
+                <div className="bp-card-time bp-time-red"><span className="bp-icon-clock" /> {b.b3_time}</div>
               </div>
-              <div className="bp-card-otter"><SpriteOtter x={310} y={400} /></div>
+              <div className="bp-card-otter"><img src="/assets/breathe-otters/b3.png" alt="otter" /></div>
             </div>
           </div>
         </div>
@@ -138,38 +127,38 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
         {/* Section C */}
         <div className="bp-section">
           <div className="bp-sec-header">
-            <div className="bp-sec-letter bp-color-c">C</div>
+            <div className="bp-sec-letter bp-color-c">{b.secC_letter}</div>
             <div className="bp-sec-title">
-              <h2>身体需要缓一缓</h2>
-              <p>身体不舒服时，温柔陪伴</p>
+              <h2>{b.secC_title}</h2>
+              <p>{b.secC_desc}</p>
             </div>
           </div>
           <div className="bp-cards">
             <div className="bp-card bp-card-c">
               <div className="bp-card-info">
-                <h3>夜里醒了</h3>
-                <p>低亮度陪伴，帮你慢慢回到平静</p>
-                <div className="bp-card-time bp-time-blue"><span className="bp-icon-clock" /> 3 分钟</div>
+                <h3>{b.c1_title}</h3>
+                <p>{b.c1_desc}</p>
+                <div className="bp-card-time bp-time-blue"><span className="bp-icon-clock" /> {b.c1_time}</div>
               </div>
-              <div className="bp-card-otter"><SpriteOtter x={60} y={580} /></div>
+              <div className="bp-card-otter"><img src="/assets/breathe-otters/c1.png" alt="otter" /></div>
               <div className="bp-card-arrow bp-arrow-blue" />
             </div>
             <div className="bp-card bp-card-c">
               <div className="bp-card-info">
-                <h3>潮热后</h3>
-                <p>舒缓不适，慢慢平静下来</p>
-                <div className="bp-card-time bp-time-blue"><span className="bp-icon-clock" /> 3 分钟</div>
+                <h3>{b.c2_title}</h3>
+                <p>{b.c2_desc}</p>
+                <div className="bp-card-time bp-time-blue"><span className="bp-icon-clock" /> {b.c2_time}</div>
               </div>
-              <div className="bp-card-otter"><SpriteOtter x={180} y={580} /></div>
+              <div className="bp-card-otter"><img src="/assets/breathe-otters/c2.png" alt="otter" /></div>
               <div className="bp-card-arrow bp-arrow-blue" />
             </div>
             <div className="bp-card bp-card-c">
               <div className="bp-card-info">
-                <h3>身体很累</h3>
-                <p>放松身体，恢复一点能量</p>
-                <div className="bp-card-time bp-time-blue"><span className="bp-icon-clock" /> 5 分钟</div>
+                <h3>{b.c3_title}</h3>
+                <p>{b.c3_desc}</p>
+                <div className="bp-card-time bp-time-blue"><span className="bp-icon-clock" /> {b.c3_time}</div>
               </div>
-              <div className="bp-card-otter"><SpriteOtter x={310} y={590} w={80} /></div>
+              <div className="bp-card-otter"><img src="/assets/breathe-otters/c3.png" alt="otter" /></div>
               <div className="bp-card-arrow bp-arrow-blue" />
             </div>
           </div>
@@ -184,37 +173,37 @@ export function BreathePage({ activeAction }: { activeAction?: SuggestedAction |
         {/* Section D */}
         <div className="bp-section">
           <div className="bp-sec-header">
-            <div className="bp-sec-letter bp-color-d">D</div>
+            <div className="bp-sec-letter bp-color-d">{b.secD_letter}</div>
             <div className="bp-sec-title">
-              <h2>想说出来</h2>
-              <p>把心里的话，说给小水獭听</p>
+              <h2>{b.secD_title}</h2>
+              <p>{b.secD_desc}</p>
             </div>
           </div>
           <div className="bp-cards">
             <div className="bp-card bp-card-d">
               <div className="bp-card-info">
-                <h3>跟你说说</h3>
-                <p>想说什么，跟我聊聊吧</p>
-                <div className="bp-card-time bp-time-purple"><span className="bp-icon-clock" /> 不限时</div>
+                <h3>{b.d1_title}</h3>
+                <p>{b.d1_desc}</p>
+                <div className="bp-card-time bp-time-purple"><span className="bp-icon-clock" /> {b.d1_time}</div>
               </div>
-              <div className="bp-card-otter"><SpriteOtter x={60} y={760} /></div>
+              <div className="bp-card-otter"><img src="/assets/breathe-otters/d1.png" alt="otter" /></div>
               <div className="bp-card-arrow bp-arrow-purple" />
             </div>
             <div className="bp-card bp-card-d">
               <div className="bp-card-info">
-                <h3>帮我整理一下</h3>
-                <p>帮你理清思路，感觉会好一点</p>
-                <div className="bp-card-time bp-time-purple"><span className="bp-icon-clock" /> 5 分钟</div>
+                <h3>{b.d2_title}</h3>
+                <p>{b.d2_desc}</p>
+                <div className="bp-card-time bp-time-purple"><span className="bp-icon-clock" /> {b.d2_time}</div>
               </div>
-              <div className="bp-card-otter"><SpriteOtter x={180} y={760} /></div>
+              <div className="bp-card-otter"><img src="/assets/breathe-otters/d2.png" alt="otter" /></div>
             </div>
             <div className="bp-card bp-card-d">
               <div className="bp-card-info">
-                <h3>记下今天</h3>
-                <p>把今天的感受，记下来</p>
-                <div className="bp-card-time bp-time-purple"><span className="bp-icon-clock" /> 2 分钟</div>
+                <h3>{b.d3_title}</h3>
+                <p>{b.d3_desc}</p>
+                <div className="bp-card-time bp-time-purple"><span className="bp-icon-clock" /> {b.d3_time}</div>
               </div>
-              <div className="bp-card-otter"><SpriteOtter x={310} y={760} /></div>
+              <div className="bp-card-otter"><img src="/assets/breathe-otters/d3.png" alt="otter" /></div>
             </div>
           </div>
         </div>

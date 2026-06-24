@@ -9,6 +9,7 @@ import { TimelinePage } from "../pages/TimelinePage";
 import { WatchfacePage } from "../pages/WatchfacePage";
 import { deviceAdapter } from "../services/deviceAdapter";
 import { getRouteFromHash, type AppRoute } from "./routes";
+import { LangProvider } from "../locales";
 
 export function App() {
   const [route, setRoute] = useState<AppRoute>(() => getRouteFromHash(window.location.hash));
@@ -47,7 +48,7 @@ export function App() {
   };
 
   return (
-    <>
+    <LangProvider>
       {route === "talk" && <TalkPage onStartAction={startAction} />}
       {route === "breathe" && <BreathePage activeAction={activeAction} />}
       {route === "move" && <MovePage activeAction={activeAction} />}
@@ -55,6 +56,6 @@ export function App() {
       {route === "me" && <MePage />}
       {route === "watchfaces" && <WatchfacePage />}
       {route !== "watchfaces" && <BottomNav activeRoute={route} />}
-    </>
+    </LangProvider>
   );
 }

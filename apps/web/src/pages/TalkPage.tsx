@@ -3,11 +3,14 @@ import type { AIUnderstandResponse, SuggestedAction, UserInput } from "@ai-otter
 import { aiService as aiAgentService } from "../services/aiService";
 import { deviceAdapter } from "../services/deviceAdapter";
 import { useSpeech } from "../hooks/useSpeech";
+import { useT, useLang } from "../locales";
 
 export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedAction) => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<AIUnderstandResponse | null>(null);
   const { speak } = useSpeech();
+  const t = useT();
+  const { lang, toggleLang } = useLang();
 
   const submit = async (value: string) => {
     const clean = value.trim();
@@ -47,7 +50,7 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
     return (
       <div className="tp-page">
         <div className="tp-loading">
-          <p className="tp-loading-text">小水獭正在思考…</p>
+          <p className="tp-loading-text">{lang === "zh" ? "小水獭正在思考…" : "Otter is thinking…"}</p>
         </div>
       </div>
     );
@@ -67,12 +70,12 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
               className="tp-btn-start"
               onClick={() => onStartAction(response.suggestedAction)}
             >
-              开始
+              {t.common.start}
             </button>
             <div className="tp-btn-row">
-              <button className="tp-btn-sec" onClick={clearResponse}>跳过</button>
-              <button className="tp-btn-sec" onClick={clearResponse}>换一个</button>
-              <button className="tp-btn-sec" onClick={clearResponse}>稍后</button>
+              <button className="tp-btn-sec" onClick={clearResponse}>{t.common.skip}</button>
+              <button className="tp-btn-sec" onClick={clearResponse}>{t.common.change}</button>
+              <button className="tp-btn-sec" onClick={clearResponse}>{t.common.later}</button>
             </div>
           </div>
           {response.safetyDisclaimer && (
@@ -118,18 +121,18 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
                 <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
                 <line x1="12" y1="20" x2="12.01" y2="20"></line>
               </svg>
-              <span>小水獭已连接</span>
+              <span>{t.me.connected}</span>
             </div>
           </div>
         </div>
         <div className="tp-header-right">
-          <button className="tp-badge tp-badge-white tp-lang-btn">
+          <button className="tp-badge tp-badge-white tp-lang-btn" onClick={toggleLang}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="2" y1="12" x2="22" y2="12"></line>
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
             </svg>
-            <span>中 / En</span>
+            <span>{t.common.langLabel}</span>
           </button>
           <div className="tp-battery-text">
             <svg width="22" height="11" viewBox="0 0 24 12" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -151,14 +154,14 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
       {/* ── Main Content ── */}
       <div className="tp-content">
         <div className="tp-prompt-area">
-          <h2 className="tp-prompt-title">今天想先说点什么？</h2>
-          <p className="tp-prompt-subtitle">我在，慢慢说。<br/>身体和心情，都可以告诉我。</p>
+          <h2 className="tp-prompt-title">{t.talk.greeting}</h2>
+          <p className="tp-prompt-subtitle">{t.talk.subtitle}</p>
         </div>
 
         <button 
           className="tp-hold-btn"
           onClick={() => {
-            const val = window.prompt("模拟语音输入：", "我有点累");
+            const val = window.prompt(t.talk.simulateVoice, lang === "zh" ? "我有点累" : "I'm feeling a bit tired");
             if (val) submit(val);
           }}
         >
@@ -168,27 +171,27 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
             <line x1="12" y1="19" x2="12" y2="22"></line>
           </svg>
           <div className="tp-hold-text">
-            <span className="tp-hold-title">按住说话</span>
-            <span className="tp-hold-subtitle">松手结束</span>
+            <span className="tp-hold-title">{lang === "zh" ? "按住说话" : "Hold to Talk"}</span>
+            <span className="tp-hold-subtitle">{lang === "zh" ? "松手结束" : "Release to Send"}</span>
           </div>
         </button>
 
         <div className="tp-grid">
-          <button className="tp-grid-item tp-grid-green" onClick={() => submit("我有点累，想缓一缓")}>
+          <button className="tp-grid-item tp-grid-green" onClick={() => submit(lang === "zh" ? "我有点累，想缓一缓" : "I'm feeling tired and need a breather")}>
             <span className="tp-grid-icon">🦦</span>
-            <span className="tp-grid-text">我有点累</span>
+            <span className="tp-grid-text">{lang === "zh" ? "我有点累" : "Feeling tired"}</span>
           </button>
-          <button className="tp-grid-item tp-grid-orange" onClick={() => submit("肩颈很紧，久坐了，想动一动")}>
+          <button className="tp-grid-item tp-grid-orange" onClick={() => submit(lang === "zh" ? "肩颈很紧，久坐了，想动一动" : "My neck and shoulders are so stiff from sitting")}>
             <span className="tp-grid-icon">🤸</span>
-            <span className="tp-grid-text">肩颈很紧</span>
+            <span className="tp-grid-text">{lang === "zh" ? "肩颈很紧" : "Stiff neck"}</span>
           </button>
-          <button className="tp-grid-item tp-grid-purple" onClick={() => submit("夜醒了，睡不着，能陪我吗")}>
+          <button className="tp-grid-item tp-grid-purple" onClick={() => submit(lang === "zh" ? "夜醒了，睡不着，能陪我吗" : "Woke up in the night and can't get back to sleep")}>
             <span className="tp-grid-icon">🌙</span>
-            <span className="tp-grid-text">夜醒睡不着</span>
+            <span className="tp-grid-text">{lang === "zh" ? "夜醒睡不着" : "Can't sleep"}</span>
           </button>
-          <button className="tp-grid-item tp-grid-orange" onClick={() => submit("热醒了，潮热出汗，帮我缓缓")}>
+          <button className="tp-grid-item tp-grid-orange" onClick={() => submit(lang === "zh" ? "热醒了，潮热出汗，帮我缓缓" : "Hot flash woke me up, need to cool down")}>
             <span className="tp-grid-icon">🌡️</span>
-            <span className="tp-grid-text">热醒了</span>
+            <span className="tp-grid-text">{lang === "zh" ? "热醒了" : "Hot flash"}</span>
           </button>
         </div>
 
@@ -206,7 +209,7 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
               <path d="M12 18h.01"></path>
               <path d="M16 18h.01"></path>
             </svg>
-            <span>今天还没有记录</span>
+            <span>{lang === "zh" ? "今天还没有记录" : "No check-ins yet today"}</span>
           </div>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B0B5B1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="9 18 15 12 9 6"></polyline>
