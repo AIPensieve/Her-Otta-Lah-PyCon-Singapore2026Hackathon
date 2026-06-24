@@ -31,9 +31,18 @@ Sent on connect and after each command is handled.
 |-------|---------|
 | `idle` | Default resting screen – otter logo |
 | `listening` | User is talking – "我在听" |
+| `thinking` | AI is organizing a reply |
 | `breathing` | Breathing exercise in progress |
 | `moving` | Movement exercise in progress |
 | `sleeping` | Low-power / night mode |
+| `night_calm` | Night wake calm screen |
+| `hot_flash_calm` | Hot flash calming screen |
+| `exercise_countdown` | Movement countdown screen |
+| `next_move` | Prompt for next movement |
+| `reminder` | Daily reminder screen |
+| `location_confirm` | User-initiated location send confirmation |
+| `location_sent` | Location sent confirmation |
+| `low_battery` | Low battery screen |
 
 ### lightMode values
 
@@ -96,6 +105,46 @@ Trigger a vibration pattern (requires external motor on GPIO).
 {"type": "VIBRATE", "payload": {"pattern": "short"}}
 ```
 `pattern` is `"short"`, `"long"`, or `"double"`.
+
+### SET_WATCHFACE
+Preferred command for the production AMOLED watchface UI. The web app sends this command when the app flow wants the device to show a named watchface. The ESP32 should map `payload.screen` to its local renderer or bitmap asset.
+
+```json
+{
+  "type": "SET_WATCHFACE",
+  "payload": {
+    "screen": "exercise-countdown",
+    "title": "运动倒计时",
+    "subtitle": "肩颈拉伸",
+    "locale": "mixed",
+    "step": 2,
+    "totalSteps": 5,
+    "remainingSeconds": 30,
+    "batteryLevel": 80,
+    "lightMode": "soft",
+    "vibration": "none"
+  }
+}
+```
+
+#### watchface screen values
+
+| Value | Intended screen |
+|-------|-----------------|
+| `default` | Default companion |
+| `listening` | Listening |
+| `thinking` | Thinking / organizing |
+| `breathing` | Breathing meditation |
+| `night-wake` | Night wake |
+| `hot-flash` | Hot flash calm |
+| `exercise-countdown` | Movement countdown |
+| `next-move` | Next movement |
+| `daily-reminder` | Daily reminder |
+| `send-location` | Send location confirmation |
+| `location-sent` | Location sent |
+| `connection` | Wi-Fi / Bluetooth / battery status |
+
+For safety, `send-location` and `location-sent` must only be triggered after an explicit user action. They must not be used for covert or continuous location tracking.
 
 ## TypeScript Types
 

@@ -20,20 +20,22 @@ export function OtterIllustration({
   size = "hero",
   alt = "Otter companion",
   className = "",
-  showHeart = false
+  showHeart = false,
+  circular = false
 }: {
   variant?: OtterVariant;
   size?: OtterSize;
   alt?: string;
   className?: string;
   showHeart?: boolean;
+  circular?: boolean;
 }) {
   return (
-    <div className={`relative ${sizeClass[size]} ${className}`}>
+    <div className={`relative ${sizeClass[size]} ${circular ? "overflow-hidden rounded-full" : ""} ${className}`}>
       <img
         src={variantSrc[variant]}
         alt={alt}
-        className="h-full w-full object-contain drop-shadow-[0_12px_28px_rgba(90,74,46,0.14)]"
+        className={`h-full w-full ${circular ? "object-cover" : "object-contain"} drop-shadow-[0_12px_28px_rgba(90,74,46,0.14)]`}
       />
       {showHeart ? (
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xl">🧡</div>

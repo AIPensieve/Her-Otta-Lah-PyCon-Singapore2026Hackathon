@@ -21,6 +21,9 @@
 - [x] Correct Talk-page asset usage and align app shell width to mobile PWA reference.
 - [x] Restore Bottom Navigation and Breathe page toward mobile reference visuals.
 - [x] Restore Move in-progress page toward mobile reference visuals.
+- [x] Add standalone watchface UI page from generated reference states.
+- [x] Add SET_WATCHFACE command contract and simulator integration.
+- [x] Wire Talk and Move flow events to SET_WATCHFACE commands.
 
 ## Nice To Have
 

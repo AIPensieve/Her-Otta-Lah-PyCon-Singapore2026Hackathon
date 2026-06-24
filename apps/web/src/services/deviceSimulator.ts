@@ -1,4 +1,11 @@
-import type { DeviceCommand, DeviceState, DeviceScreenState, DeviceLightMode } from "@ai-otter/shared-types";
+import type {
+  DeviceCommand,
+  DeviceLightMode,
+  DeviceScreenState,
+  DeviceState,
+  WatchfacePayload,
+  WatchfaceScreen
+} from "@ai-otter/shared-types";
 import { sendDeviceCommand } from "./webApiService";
 
 export type DeviceSimulatorListener = (state: DeviceState) => void;
@@ -97,6 +104,31 @@ export class DeviceSimulator {
     return this.state;
   }
 
+  sendWatchface(payload: WatchfacePayload): DeviceState {
+    return this.sendCommand({
+      type: "SET_WATCHFACE",
+      payload
+    });
+  }
+
+  private _mapWatchfaceToScreenState(screen: WatchfaceScreen): DeviceScreenState {
+    const map: Record<WatchfaceScreen, DeviceScreenState> = {
+      default: "idle",
+      listening: "listening",
+      thinking: "thinking",
+      breathing: "breathing",
+      "night-wake": "night_calm",
+      "hot-flash": "hot_flash_calm",
+      "exercise-countdown": "exercise_countdown",
+      "next-move": "next_move",
+      "daily-reminder": "reminder",
+      "send-location": "location_confirm",
+      "location-sent": "location_sent",
+      connection: "idle"
+    };
+    return map[screen];
+  }
+
   private _applyCommandLocally(command: DeviceCommand) {
     const now = new Date().toISOString();
 
@@ -134,6 +166,19 @@ export class DeviceSimulator {
       case "VIBRATE":
         // no-op for simulator; hardware handles this
         break;
+
+      case "SET_WATCHFACE": {
+        const p = command.payload;
+        this.state = {
+          ...this.state,
+          screenState: this._mapWatchfaceToScreenState(p.screen),
+          lightMode: p.lightMode ?? this.state.lightMode,
+          batteryLevel: p.batteryLevel ?? this.state.batteryLevel,
+          watchface: p,
+          lastSeenAt: now,
+        };
+        break;
+      }
 
       case "DEVICE_STATE": {
         const p = command.payload;

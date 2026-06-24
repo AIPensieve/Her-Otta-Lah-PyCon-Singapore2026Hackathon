@@ -50,17 +50,17 @@ function NavIcon({ id }: { id: AppRoute }) {
 
 export function BottomNav({ activeRoute }: { activeRoute: AppRoute }) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-10 px-3 pb-3">
-      <div className="mx-auto grid max-w-[390px] grid-cols-5 gap-1 rounded-t-[22px] border border-[#e4d8c5] bg-[#fffaf0]/96 px-2 pb-2 pt-2 shadow-[0_-10px_28px_rgba(90,74,46,0.10)] backdrop-blur">
+    <nav className="fixed inset-x-0 bottom-0 z-10 px-4 pb-4">
+      <div className="mx-auto grid max-w-[390px] grid-cols-5 gap-1 rounded-[24px] border border-[#eadfce] bg-[#fffdf7] px-2 pb-2 pt-2 shadow-[0_-8px_28px_rgba(56,43,24,0.10)]">
         {routes.map((route) => (
           <a
             key={route.id}
             href={route.path}
             aria-current={activeRoute === route.id ? "page" : undefined}
-            className={`flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-[18px] px-1 text-center text-[11px] font-semibold leading-none transition ${
+            className={`flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-[20px] px-1 text-center text-[11px] font-semibold leading-none transition ${
               activeRoute === route.id
-                ? "bg-[#446f4d] text-white shadow-[0_8px_16px_rgba(68,111,77,0.20)]"
-                : "text-[#4f5a4d] active:bg-[#efe6d7]"
+                ? "bg-[#5f875e] text-white shadow-[0_8px_18px_rgba(95,135,94,0.26)]"
+                : "text-[#777a71] active:bg-[#f0eadf]"
             }`}
           >
             <NavIcon id={route.id} />

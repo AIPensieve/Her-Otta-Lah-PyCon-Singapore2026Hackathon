@@ -6,6 +6,8 @@ import { MePage } from "../pages/MePage";
 import { MovePage } from "../pages/MovePage";
 import { TalkPage } from "../pages/TalkPage";
 import { TimelinePage } from "../pages/TimelinePage";
+import { WatchfacePage } from "../pages/WatchfacePage";
+import { deviceAdapter } from "../services/deviceAdapter";
 import { getRouteFromHash, type AppRoute } from "./routes";
 
 export function App() {
@@ -21,6 +23,26 @@ export function App() {
 
   const startAction = (action: SuggestedAction) => {
     setActiveAction(action);
+    if (action.type === "move") {
+      deviceAdapter.showWatchface({
+        screen: "next-move",
+        title: "Next",
+        subtitle: "下一个动作",
+        locale: "mixed",
+        lightMode: "soft",
+        vibration: "short",
+      });
+    }
+    if (action.type === "breathe") {
+      deviceAdapter.showWatchface({
+        screen: "breathing",
+        title: "Breathe in",
+        subtitle: "吸气",
+        locale: "mixed",
+        lightMode: "breathing",
+        vibration: "short",
+      });
+    }
     window.location.hash = action.type === "move" ? "/move" : "/breathe";
   };
 
@@ -31,7 +53,8 @@ export function App() {
       {route === "move" && <MovePage activeAction={activeAction} />}
       {route === "timeline" && <TimelinePage />}
       {route === "me" && <MePage />}
-      <BottomNav activeRoute={route} />
+      {route === "watchfaces" && <WatchfacePage />}
+      {route !== "watchfaces" && <BottomNav activeRoute={route} />}
     </>
   );
 }

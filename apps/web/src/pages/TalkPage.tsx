@@ -1,15 +1,18 @@
 import { useState } from "react";
 import type { AIUnderstandResponse, SuggestedAction, UserInput } from "@ai-otter/shared-types";
-import { OtterIllustration } from "../components/OtterIllustration";
 import { aiService as aiAgentService } from "../services/aiService";
+import { deviceAdapter } from "../services/deviceAdapter";
+import { useSpeech } from "../hooks/useSpeech";
 
 export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedAction) => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<AIUnderstandResponse | null>(null);
+  const { speak } = useSpeech();
 
   const submit = async (value: string) => {
     const clean = value.trim();
     if (!clean) return;
+    deviceAdapter.setListening("我在听");
     setIsLoading(true);
     setResponse(null);
     const input: UserInput = {
@@ -19,20 +22,31 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
       locale: "mixed",
       createdAt: new Date().toISOString()
     };
-    setResponse(await aiAgentService.understandUserInput(input));
+    deviceAdapter.setThinking("整理中");
+    const result = await aiAgentService.understandUserInput(input);
+    setResponse(result);
     setIsLoading(false);
+    // Speak the otter's crafted line (pet_voice_text from backend, or reply)
+    const voiceLine = result.petVoiceText ?? result.reply;
+    if (voiceLine) setTimeout(() => speak(voiceLine), 300);
+  };
+
+  const clearResponse = () => {
+    setResponse(null);
+    deviceAdapter.showWatchface({
+      screen: "default",
+      title: "默认陪伴",
+      subtitle: "我在这里陪着你",
+      locale: "mixed",
+      lightMode: "soft",
+      vibration: "none",
+    });
   };
 
   if (isLoading) {
     return (
       <div className="tp-page">
         <div className="tp-loading">
-          <OtterIllustration
-            variant="thinking"
-            size="hero"
-            alt="小水獭思考中"
-            className="tp-otter-pulse"
-          />
           <p className="tp-loading-text">小水獭正在思考…</p>
         </div>
       </div>
@@ -43,7 +57,6 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
     return (
       <div className="tp-page">
         <div className="tp-result-wrap">
-          <OtterIllustration variant="default" size="card" alt="小水獭陪伴" />
           <div className="tp-bubble">
             <p className="tp-bubble-text">{response.reply}</p>
           </div>
@@ -57,9 +70,9 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
               开始
             </button>
             <div className="tp-btn-row">
-              <button className="tp-btn-sec" onClick={() => setResponse(null)}>跳过</button>
-              <button className="tp-btn-sec" onClick={() => setResponse(null)}>换一个</button>
-              <button className="tp-btn-sec" onClick={() => setResponse(null)}>稍后</button>
+              <button className="tp-btn-sec" onClick={clearResponse}>跳过</button>
+              <button className="tp-btn-sec" onClick={clearResponse}>换一个</button>
+              <button className="tp-btn-sec" onClick={clearResponse}>稍后</button>
             </div>
           </div>
           {response.safetyDisclaimer && (
@@ -72,88 +85,135 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
 
   return (
     <div className="tp-page">
-      {/* ── Status bar ── */}
+      {/* ── Status bar (Mocked to match screenshot) ── */}
       <div className="tp-statusbar">
         <span className="tp-statusbar-time">9:41</span>
         <div className="tp-statusbar-icons">
-          <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
-            <rect x="0" y="3" width="3" height="9" rx="0.5" fill="#2c2416"/>
-            <rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="#2c2416"/>
-            <rect x="9" y="0.5" width="3" height="11.5" rx="0.5" fill="#2c2416"/>
-            <rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="#2c2416"/>
+          {/* Signal */}
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M1 11h2v-2H1v2zm4 0h2v-4H5v4zm4 0h2v-7H9v7zm4 0h2V1h-2v10z"/>
           </svg>
-          <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-            <path d="M8 2.5C10.2 2.5 12.2 3.4 13.6 4.9L15 3.5C13.2 1.6 10.7 0.5 8 0.5C5.3 0.5 2.8 1.6 1 3.5L2.4 4.9C3.8 3.4 5.8 2.5 8 2.5Z" fill="#2c2416"/>
-            <path d="M8 5.5C9.4 5.5 10.6 6.1 11.5 7L12.9 5.6C11.6 4.3 9.9 3.5 8 3.5C6.1 3.5 4.4 4.3 3.1 5.6L4.5 7C5.4 6.1 6.6 5.5 8 5.5Z" fill="#2c2416"/>
-            <circle cx="8" cy="10" r="1.5" fill="#2c2416"/>
+          {/* WiFi */}
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 5.5c4-4 10-4 14 0M3.5 8c2.5-2.5 6.5-2.5 9 0M8 11.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1z"/>
           </svg>
-          <div className="tp-battery">
-            <div className="tp-battery-inner" style={{width: '75%'}} />
-          </div>
+          {/* Battery */}
+          <svg width="24" height="12" viewBox="0 0 24 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="1" y="1" width="20" height="10" rx="2.5"/>
+            <path d="M23 4v4" strokeLinecap="round"/>
+            <rect x="3" y="3" width="16" height="6" rx="1" fill="currentColor" stroke="none"/>
+          </svg>
         </div>
       </div>
 
-      {/* ── Header row ── */}
+      {/* ── Header ── */}
       <div className="tp-header">
-        <div>
-          <h1 className="tp-greeting">早上好！<br />我在这里陪着你 <span>☀️</span></h1>
-          <div className="tp-connected-badge">
-            <span className="tp-connected-dot" />
-            <span>小水獭已连接</span>
+        <div className="tp-header-left">
+          <h1 className="tp-greeting">早上好！<span className="tp-sun">☀️</span><br />我在这里陪着你</h1>
+          <div className="tp-badges">
+            <div className="tp-badge tp-badge-gray">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A6B53" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                <line x1="12" y1="20" x2="12.01" y2="20"></line>
+              </svg>
+              <span>小水獭已连接</span>
+            </div>
           </div>
         </div>
-        <button className="tp-lang-btn">
-          <span className="tp-lang-icon">🌐</span>
-          <span>中/En</span>
-        </button>
+        <div className="tp-header-right">
+          <button className="tp-badge tp-badge-white tp-lang-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span>中 / En</span>
+          </button>
+          <div className="tp-battery-text">
+            <svg width="22" height="11" viewBox="0 0 24 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="1" y="1" width="20" height="10" rx="2.5"/>
+              <path d="M23 4v4" strokeLinecap="round"/>
+              <rect x="3" y="3" width="16" height="6" rx="1" fill="currentColor" stroke="none"/>
+            </svg>
+            <span>80%</span>
+          </div>
+        </div>
       </div>
 
-      <div className="tp-otter-wrap">
-        <OtterIllustration variant="default" size="hero" alt="小水獭陪伴" showHeart />
+      {/* ── Hero Image ── */}
+      <div className="tp-hero">
+        {/* We use the extracted otter-hero-new image here. Since it includes the green background natively from the sprite sheet crop, it fits perfectly. */}
+        <img src="/assets/otter-hero-new.png" alt="Otter" className="tp-hero-img" />
       </div>
 
-      {/* ── Prompt ── */}
-      <p className="tp-prompt">今天想先说点什么？</p>
-      <p className="tp-subprompt">我在，慢慢说。<br />身体和心情，都可以告诉我。</p>
+      {/* ── Main Content ── */}
+      <div className="tp-content">
+        <div className="tp-prompt-area">
+          <h2 className="tp-prompt-title">今天想先说点什么？</h2>
+          <p className="tp-prompt-subtitle">我在，慢慢说。<br/>身体和心情，都可以告诉我。</p>
+        </div>
 
-      {/* ── Hold to Talk button ── */}
-      <div className="tp-hold-wrap">
-        <button
+        <button 
           className="tp-hold-btn"
           onClick={() => {
-            const val = window.prompt("模拟语音输入：", "我今天有点累，不想动");
+            const val = window.prompt("模拟语音输入：", "我有点累");
             if (val) submit(val);
           }}
         >
-          <svg className="tp-mic" viewBox="0 0 24 24" fill="white">
-            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+          <svg className="tp-mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="22"></line>
           </svg>
-          按住说话
+          <div className="tp-hold-text">
+            <span className="tp-hold-title">按住说话</span>
+            <span className="tp-hold-subtitle">松手结束</span>
+          </div>
+        </button>
+
+        <div className="tp-grid">
+          <button className="tp-grid-item tp-grid-green" onClick={() => submit("我有点累，想缓一缓")}>
+            <span className="tp-grid-icon">🦦</span>
+            <span className="tp-grid-text">我有点累</span>
+          </button>
+          <button className="tp-grid-item tp-grid-orange" onClick={() => submit("肩颈很紧，久坐了，想动一动")}>
+            <span className="tp-grid-icon">🤸</span>
+            <span className="tp-grid-text">肩颈很紧</span>
+          </button>
+          <button className="tp-grid-item tp-grid-purple" onClick={() => submit("夜醒了，睡不着，能陪我吗")}>
+            <span className="tp-grid-icon">🌙</span>
+            <span className="tp-grid-text">夜醒睡不着</span>
+          </button>
+          <button className="tp-grid-item tp-grid-orange" onClick={() => submit("热醒了，潮热出汗，帮我缓缓")}>
+            <span className="tp-grid-icon">🌡️</span>
+            <span className="tp-grid-text">热醒了</span>
+          </button>
+        </div>
+
+        <button className="tp-record-link">
+          <div className="tp-record-left">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A6B53" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+              <path d="M8 14h.01"></path>
+              <path d="M12 14h.01"></path>
+              <path d="M16 14h.01"></path>
+              <path d="M8 18h.01"></path>
+              <path d="M12 18h.01"></path>
+              <path d="M16 18h.01"></path>
+            </svg>
+            <span>今天还没有记录</span>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B0B5B1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
         </button>
       </div>
 
-      {/* ── Shortcut chips ── */}
-      <div className="tp-chips">
-        {/* Demo Route 1: emotion → breathing_60s */}
-        <button className="tp-chip" onClick={() => submit("我今天很烦，昨晚也没睡好。")}>
-          <span className="tp-chip-icon">😮‍💨</span> 烦躁睡不好
-        </button>
-        {/* Demo Route 2: body → neck_relax_3min */}
-        <button className="tp-chip" onClick={() => submit("我肩颈很紧，想动一下。")}>
-          <span className="tp-chip-icon">💆</span> 肩颈很紧
-        </button>
-        {/* Demo Route 3: night / hot flash → hot_flash_calm */}
-        <button className="tp-chip" onClick={() => submit("我昨晚三点热醒了，后来心跳有点快。")}>
-          <span className="tp-chip-icon">🌙</span> 夜里热醒
-        </button>
-        <button className="tp-chip" onClick={() => submit("想动一动")}>
-          <span className="tp-chip-icon">🏃‍♀️</span> 想动一动
-        </button>
-      </div>
-
-      {/* ── Footer notice ── */}
-      <p className="tp-footer-note">今天还没有记录</p>
     </div>
   );
 }

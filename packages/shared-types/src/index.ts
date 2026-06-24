@@ -26,16 +26,24 @@ export type SuggestedAction = {
 export type AIUnderstandResponse = {
   id: string;
   inputId: string;
-  detectedState: {
+  detectedState?: {
     mood?: "tired" | "anxious" | "sad" | "irritated" | "calm" | "unclear";
     bodySignals: string[];
     riskLevel: "normal" | "needs-human-help";
     language: LocaleCode;
   };
   reply: string;
+  /** Short voice line for the otter companion (from pet_voice_text in API contract) */
+  petVoiceText?: string;
+  /** Intent label from backend (mood_body_record / exercise_request / …) */
+  intent?: string;
   suggestedAction: SuggestedAction;
   safetyDisclaimer: string;
-  createdAt: string;
+  /** "normal" | "high" | "emergency" */
+  safetyLevel?: string;
+  /** Whether the backend suggests creating a record from this turn */
+  wantsRecord?: boolean;
+  createdAt?: string;
 };
 
 export type ExercisePlan = {
@@ -115,6 +123,33 @@ export type DeviceScreenState =
 
 export type DeviceLightMode = "off" | "soft" | "breathing" | "alert" | "night" | "pulse";
 
+export type WatchfaceScreen =
+  | "default"
+  | "listening"
+  | "thinking"
+  | "breathing"
+  | "night-wake"
+  | "hot-flash"
+  | "exercise-countdown"
+  | "next-move"
+  | "daily-reminder"
+  | "send-location"
+  | "location-sent"
+  | "connection";
+
+export type WatchfacePayload = {
+  screen: WatchfaceScreen;
+  title: string;
+  subtitle?: string;
+  locale?: LocaleCode;
+  step?: number;
+  totalSteps?: number;
+  remainingSeconds?: number;
+  batteryLevel?: number;
+  lightMode?: DeviceLightMode;
+  vibration?: "none" | "short" | "long" | "double";
+};
+
 export type DeviceState = {
   deviceId: string;
   connection: "disconnected" | "connecting" | "connected";
@@ -122,6 +157,7 @@ export type DeviceState = {
   screenState: DeviceScreenState;
   lightMode: DeviceLightMode;
   volume: number;
+  watchface?: WatchfacePayload;
   lastSeenAt?: string;
 };
 
@@ -158,6 +194,10 @@ export type DeviceCommand =
   | {
       type: "VIBRATE";
       payload: { pattern: "short" | "long" | "double" };
+    }
+  | {
+      type: "SET_WATCHFACE";
+      payload: WatchfacePayload;
     }
   | {
       /** Unified device state command — preferred for new code */
