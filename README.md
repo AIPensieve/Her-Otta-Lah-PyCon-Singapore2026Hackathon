@@ -14,7 +14,7 @@
 **Track:** PyCon Singapore 2026 Hackathon Open Track / Creative Track  
 **Submission Repositories:**
 - 🏆 Main submission repo: [AIPensieve/Her-Otta-Lah-PyCon26Hackathon](https://github.com/AIPensieve/Her-Otta-Lah-PyCon26Hackathon)
-- 💻 Team integration repo (Hardware + Software): [clover475/ai-otter-coach](https://github.com/clover475/ai-otter-coach.git) *(You are here)*
+- 💻 Team integration repo (Hardware + Software): [https://github.com/clover475/Her-Otta-Lah-PyCon-Singapore-2026-Hackathon) *(You are here)*
 
 ---
 
