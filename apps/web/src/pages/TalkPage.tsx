@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { AIUnderstandResponse, SuggestedAction, UserInput } from "@ai-otter/shared-types";
+import { OtterIllustration } from "../components/OtterIllustration";
 import { aiService as aiAgentService } from "../services/aiService";
 
 export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedAction) => void }) {
@@ -26,8 +27,12 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
     return (
       <div className="tp-page">
         <div className="tp-loading">
-          {/* Otter sprite from the spritesheet – default state */}
-          <div className="tp-otter-sprite tp-otter-default tp-otter-pulse" />
+          <OtterIllustration
+            variant="thinking"
+            size="hero"
+            alt="小水獭思考中"
+            className="tp-otter-pulse"
+          />
           <p className="tp-loading-text">小水獭正在思考…</p>
         </div>
       </div>
@@ -38,7 +43,7 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
     return (
       <div className="tp-page">
         <div className="tp-result-wrap">
-          <div className="tp-otter-sprite tp-otter-default tp-otter-sm" />
+          <OtterIllustration variant="default" size="card" alt="小水獭陪伴" />
           <div className="tp-bubble">
             <p className="tp-bubble-text">{response.reply}</p>
           </div>
@@ -103,11 +108,8 @@ export function TalkPage({ onStartAction }: { onStartAction: (action: SuggestedA
         </button>
       </div>
 
-      {/* ── Otter illustration ── */}
-      {/* Using the full spritesheet and positioning to show only the talk-page otter */}
       <div className="tp-otter-wrap">
-        <div className="tp-otter-sprite tp-otter-default" />
-        <div className="tp-heart">❤️</div>
+        <OtterIllustration variant="default" size="hero" alt="小水獭陪伴" showHeart />
       </div>
 
       {/* ── Prompt ── */}

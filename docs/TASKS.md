@@ -18,6 +18,9 @@
 - [x] Add PWA icons and screenshots.
 - [x] Add richer Talk to action recommendation states.
 - [x] Add action completion confirmation before saving.
+- [x] Correct Talk-page asset usage and align app shell width to mobile PWA reference.
+- [x] Restore Bottom Navigation and Breathe page toward mobile reference visuals.
+- [x] Restore Move in-progress page toward mobile reference visuals.
 
 ## Nice To Have
 

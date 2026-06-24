@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { deviceSimulator } from "../services/deviceSimulator";
 import type { DeviceState } from "@ai-otter/shared-types";
+import { OtterIllustration } from "./OtterIllustration";
 
 export function DeviceHardwareUI({ onClose }: { onClose: () => void }) {
   const [device, setDevice] = useState<DeviceState>(deviceSimulator.getState());
@@ -26,8 +27,8 @@ export function DeviceHardwareUI({ onClose }: { onClose: () => void }) {
         bgClass: "bg-gradient-to-b from-[#1c4d40] to-[#2f5d50]",
         title: "Listening",
         subtitle: "我在听",
-        icon: "🎙️",
-        textColor: "text-white"
+        textColor: "text-white",
+        otterVariant: "listening" as const
       };
     }
     if (device.screenState === "breathing") {
@@ -35,8 +36,17 @@ export function DeviceHardwareUI({ onClose }: { onClose: () => void }) {
         bgClass: "bg-gradient-to-b from-[#87b1a2] to-[#b4cdb8]",
         title: "Thinking",
         subtitle: "整理中",
-        icon: "✨",
-        textColor: "text-[#185d49]"
+        textColor: "text-[#185d49]",
+        otterVariant: "breathing" as const
+      };
+    }
+    if (device.screenState === "moving") {
+      return {
+        bgClass: "bg-[#f3ead5]",
+        title: "Next",
+        subtitle: "下一个",
+        textColor: "text-[#355f43]",
+        otterVariant: "default" as const
       };
     }
     // Default
@@ -44,8 +54,8 @@ export function DeviceHardwareUI({ onClose }: { onClose: () => void }) {
       bgClass: "bg-[#f4ebd9]",
       title: timeStr,
       subtitle: "",
-      icon: "",
-      textColor: "text-[#5d4037]"
+      textColor: "text-[#5d4037]",
+      otterVariant: "default" as const
     };
   }, [device.screenState, timeStr]);
 
@@ -83,7 +93,6 @@ export function DeviceHardwareUI({ onClose }: { onClose: () => void }) {
 
             {/* Time or Title Display */}
             <div className={`mt-2 flex flex-col items-center ${visualState.textColor}`}>
-              {visualState.icon && <span className="text-2xl mb-1">{visualState.icon}</span>}
               <h2 className={`${device.screenState === "idle" ? "text-4xl font-black tracking-tight" : "text-xl font-bold"}`}>
                 {visualState.title}
               </h2>
@@ -92,17 +101,14 @@ export function DeviceHardwareUI({ onClose }: { onClose: () => void }) {
 
             {/* Otter Illustration */}
             <div className="absolute bottom-[-10px] w-full flex justify-center">
-               {/* 
-                 Using the generated icon, but making it scale up from bottom. 
-                 Since the original icon has a background, we just use css blend mode or border radius to make it look decent.
-                 Ideally we would use a transparent PNG.
-               */}
-               <img 
-                 src="/icons/icon-512x512.png" 
-                 alt="Otter" 
-                 className={`w-64 h-64 object-cover object-top mix-blend-multiply transition-transform duration-500 ${device.screenState === 'listening' ? 'scale-110 translate-y-4' : 'scale-100'}`}
-                 style={{ WebkitMaskImage: 'radial-gradient(ellipse at bottom, black 50%, transparent 100%)' }}
-               />
+              <OtterIllustration
+                variant={visualState.otterVariant}
+                size="device"
+                alt="Otter device state"
+                className={`transition-transform duration-500 ${
+                  device.screenState === "listening" ? "scale-110 translate-y-4" : "scale-100"
+                }`}
+              />
             </div>
             
             {/* Breathing Ring Overlay (Visible only when playing/breathing) */}

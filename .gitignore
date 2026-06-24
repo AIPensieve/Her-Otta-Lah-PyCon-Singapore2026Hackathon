@@ -16,3 +16,4 @@ services/backend/.venv/
 services/backend/__pycache__/
 services/backend/*.pyc
 services/backend/otter_records.db
+hardware/esp32-otter/micropython/config.py

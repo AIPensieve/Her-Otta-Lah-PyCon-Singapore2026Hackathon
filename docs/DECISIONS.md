@@ -14,3 +14,17 @@ Decision:
 Reason:
 
 This keeps the Hackathon demo simple while preserving a clean replacement point for authenticated database storage and long-term commercial records.
+
+## 2026-06-24: Runtime Otter Assets Must Not Reuse Full Design Boards
+
+The app previously rendered otter visuals by slicing a full reference-board image in the runtime UI.
+
+Decision:
+
+- Keep full design boards only as reference material.
+- Extract standalone runtime-safe otter state assets for `default`, `listening`, `thinking`, and `breathing`.
+- Use a shared `OtterIllustration` component instead of page-level background-position slicing.
+
+Reason:
+
+This preserves visual fidelity while avoiding accidental screenshot-as-UI behavior, and it gives later UI work a clean replacement point for transparent PNGs or production illustrations.

@@ -66,15 +66,15 @@ export function Modal({
 
 export function PageShell({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <main className="min-h-dvh bg-stone-100 text-slate-950">
-      <div className="mx-auto min-h-dvh max-w-md bg-stone-50 px-4 pb-28 pt-5 shadow-[0_0_40px_rgba(15,23,42,0.08)]">
+    <main className="min-h-dvh bg-[#efe7da] text-slate-950">
+      <div className="mx-auto min-h-dvh w-full max-w-[390px] bg-[#f7f1e6] px-4 pb-28 pt-5 shadow-[0_0_40px_rgba(90,74,46,0.08)]">
         <header className="mb-5 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-teal-800">nearu</p>
-            <h1 className="mt-1 text-3xl font-bold leading-tight">{title}</h1>
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-[#7f7668]">Otter companion</p>
+            <h1 className="mt-1 text-[1.85rem] font-semibold leading-tight text-[#20362b]">{title}</h1>
           </div>
-          <div className="grid size-12 shrink-0 place-items-center rounded-full bg-amber-100 text-lg font-bold text-amber-950">
-            ot
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/80 text-lg shadow-[0_6px_16px_rgba(90,74,46,0.08)]">
+            <img src="/assets/otter-default-clean.png" alt="" className="h-9 w-9 object-contain" />
           </div>
         </header>
         {children}
